@@ -1,0 +1,25 @@
+{
+  "_note": "Demo-only access control. In production, mirror the source system's ACLs (Drive/SharePoint) at query time instead of maintaining this file.",
+  "users": {
+    "employee":  { "display": "Eli Employee", "groups": ["all"] },
+    "hr_user":   { "display": "Hana HR",      "groups": ["all", "hr"] },
+    "exec_user": { "display": "Eva Executive", "groups": ["all", "hr", "finance", "sales", "exec"] }
+  },
+  "documents": {
+    "hr_pto_policy_2025.md":              { "allowed_groups": ["all"] },
+    "hr_pto_policy_2023.md":              { "allowed_groups": ["all"] },
+    "hr_parental_leave_us.md":            { "allowed_groups": ["all"] },
+    "hr_holiday_calendar_2026.md":        { "allowed_groups": ["all"] },
+    "hr_sabbatical_program.md":           { "allowed_groups": ["all"] },
+    "hr_salary_bands.md":                 { "allowed_groups": ["hr"] },
+    "exec_bonus_structure.md":            { "allowed_groups": ["exec"] },
+    "finance_vendor_onboarding.md":       { "allowed_groups": ["all"] },
+    "procurement_approval_matrix.md":     { "allowed_groups": ["all"] },
+    "finance_expense_policy.md":          { "allowed_groups": ["all"] },
+    "finance_close_calendar.md":          { "allowed_groups": ["finance"] },
+    "it_faq.md":                          { "allowed_groups": ["all"] },
+    "it_security_incident_reporting.md":  { "allowed_groups": ["all"] },
+    "sales_playbook.md":                  { "allowed_groups": ["sales"] },
+    "remote_work_policy.md":              { "allowed_groups": ["all"] }
+  }
+}

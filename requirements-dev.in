@@ -1,0 +1,3 @@
+# Dev tools only (not part of the app). Installed separately; keep out of requirements.txt.
+
+pip-audit

@@ -1,0 +1,11 @@
+# Accepted pip-audit findings. Format:  ID | reason
+# Rules: only the user may add lines here. Each needs a written reason.
+# scripts/check_env.py passes these to pip-audit as --ignore-vuln and reports them as WARN, never PASS.
+# Re-review whenever a fixed version is published. Delete a line once fixed.
+# ChromaDB 1.5.9 is the newest release on PyPI (checked 2026-10-07); no fixed version exists yet.
+# All four are server-side. They apply only if a Chroma server / auth provider is run. This project uses the
+# embedded PersistentClient only; check_env.py fails if server or HTTP client usage appears in the code.
+CVE-2026-45829 | Unauthenticated RCE in the Python API server (auth checked after model load). Server-only; not run here.
+CVE-2026-45830 | Cross-tenant data access by authenticated users. Server-only; no multi-tenant server here.
+CVE-2026-45831 | Cross-tenant bypass in SimpleRBACAuthorizationProvider. Server-only; no RBAC provider used here.
+CVE-2026-45833 | Code injection via model repo with trust_remote_code on the server. Server-only; trust_remote_code is never set here.
