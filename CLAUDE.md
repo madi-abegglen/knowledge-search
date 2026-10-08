@@ -18,7 +18,8 @@ Full build plan: `docs/build-plan.md`. Problem statement and success metrics: `d
 ## Architecture decisions (already made)
 - **Level 3 "basic RAG"**, designed so Level 4 (hybrid BM25 + reranker) is an easy upgrade later.
 - Stack: Python, ChromaDB (local persistent, `./chroma_db`), `sentence-transformers` (`all-MiniLM-L6-v2`), Anthropic API (model from `MODEL_NAME` in `.env`), Streamlit UI.
-- Chunking: ~500 tokens, 50 overlap. Re-runnable ingestion (upsert by deterministic chunk ID).
+- Chunking: split on headings first, then cap chunks at ~200 tokens (measured with the embedding model's own tokenizer) with ~30 overlap. **Never exceed 256 tokens**: `all-MiniLM-L6-v2` silently truncates beyond that, so the tail of a longer chunk would be unsearchable. Re-runnable ingestion (upsert by deterministic chunk ID).
+- Permissions in Chroma: metadata values must be scalars, and `where` can't do substring matching on metadata. Store one boolean per group (`grp_all`, `grp_hr`, `grp_finance`, `grp_sales`, `grp_exec`) and filter with `{"$or": [{"grp_<g>": True}, ...]}` over the user's groups. Never store groups as a list or a delimited string.
 - Retrieval: filter by the user's groups **inside the vector query** (metadata filter) so restricted chunks are never retrieved. Retrieve top 8, keep best 5.
 - Chunk metadata: `source, title, chunk_id, allowed_groups, version, effective_date, doc_status, last_modified`.
 - Answers have exactly **three outcomes**: (1) answer with citations, (2) refuse ("I couldn't find that"), (3) ask a clarifying question. The model returns strict JSON validated with a schema.
@@ -60,3 +61,5 @@ Users in `data/access.json`: `employee` [all], `hr_user` [all, hr], `exec_user` 
 - Ask before installing new packages or changing the architecture decisions above.
 - If something in the plan looks wrong or risky, say so rather than silently working around it.
 - Commit after each phase with a clear message.
+- Never push to a remote without my explicit approval. Commits are fine; pushes always ask first.
+
