@@ -10,8 +10,8 @@ Full build plan: `docs/build-plan.md`. Problem statement and success metrics: `d
 - [x] Phase 1: repo setup (venv, deps, `.env`, `.gitignore`, git init). **Verify, don't redo.**
 - [x] Phase 2: 15 sample docs in `data/` + `data/access.json`
 - [x] Phase 3: ingestion pipeline  
-- [ ] Phase 4: permission-aware retrieval + 3-outcome answers **<- start here**
-- [ ] Phase 5: Streamlit UI
+- [x] Phase 4: permission-aware retrieval + 3-outcome answers 
+- [ ] Phase 5: Streamlit UI **<- start here**
 - [ ] Phase 6: evals and edge-case testing
 - [ ] Phase 7: monitoring, runbook, README
 
