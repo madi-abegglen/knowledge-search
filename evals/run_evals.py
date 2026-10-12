@@ -357,6 +357,9 @@ def main() -> int:
     parser.add_argument("--only", metavar="IDS", help="comma-separated question ids to run, e.g. 2,5")
     parser.add_argument("--repeat", type=int, default=1, metavar="N",
                         help="run each selected question N times and report pass counts")
+    parser.add_argument("--no-guard", action="store_true",
+                        help="eval runner only: disable the exact-string guard to measure the raw model "
+                             "(no production flag exists)")
     parser.add_argument("--prompt-version", metavar="V",
                         help="prompt version to use (prompts/answer_v{V}.md); overrides PROMPT_VERSION")
     args = parser.parse_args()
@@ -364,6 +367,14 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if args.prompt_version:
         os.environ["PROMPT_VERSION"] = args.prompt_version
+    if args.no_guard:
+        import app.answer as answer_module
+        from app.guard import ACTION_NONE, GuardResult
+
+        answer_module.apply_exact_string_guard = (  # type: ignore[assignment]
+            lambda answer, note, chunk_texts: GuardResult(ACTION_NONE, answer, note)
+        )
+        print("NOTE: exact-string guard DISABLED for this run (eval runner only)")
     if args.repeat < 1:
         parser.error("--repeat must be >= 1")
 

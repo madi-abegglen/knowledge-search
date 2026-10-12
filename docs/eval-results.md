@@ -350,3 +350,51 @@ No question got worse. The guard did not fire in the full run (the model wrote e
 - Prose such as "meet @ noon. See" can look email-like once spaces are tolerated and would be blocked.
 - An email the user typed in the question and the answer echoes is blocked (only chunks count).
 - `clarifying_question` is not scanned. The guard fails open (action none) if it crashes; the leak scan still runs.
+
+## Original chunk text (7b2)
+
+**Change (one variable: the text stored for each chunk).** Chunk text is currently `heading + tokenizer.decode(body tokens)`: lowercased, spaced punctuation, and it is what the model sees. 7b2 stores the ORIGINAL source span for the same token window (tokenizer offset mapping) as the stored document, while embedding the current decoded text, so embeddings, chunk boundaries, ids, metadata, permissions, retrieval, prompts and the schema are intended to be unchanged. The new index is built in a scratch Chroma path; the real `chroma_db/` is not touched in this step.
+
+### Pre-registered predictions (written before any run on the scratch index)
+
+| # | Prediction |
+|---|---|
+| P1 | Chunk count stays **65**; ids and metadata (including every `grp_*` flag) are identical per chunk. |
+| P2 | Embeddings identical (max abs diff 0.0), because the embedding input is the unchanged decoded text. |
+| P3 | Top-8 ids, order and distances are identical for all 25 eval questions (retrieval unchanged). |
+| P4 | Q1-Q25 under v1 on the scratch index: **25/25**, 0 leaks, 8/8 conflicts flagged, 0 false conflict notes. |
+| P5 | Q5 x20 with the guard DISABLED (eval runner only): **at least 19/20** exact address intact, because the model now sees the correct text. Guard repairs in the normal run: **0**. |
+| P6 | Input tokens shift slightly **down** (original text has no spaces around punctuation); I expect roughly -2% on the 25-question run (26,005 baseline), plausible range -6% to +2% because original text keeps markdown markers and line breaks. |
+
+### 7b2 results vs predictions (scratch index; the real `chroma_db/` is unchanged and still holds decoded text)
+
+Built with `CHROMA_PATH` pointing at a scratch directory; compared with `scripts/compare_indexes.py chroma_db <scratch>`.
+
+| # | Prediction | Result | Verdict |
+|---|---|---|---|
+| P1 | 65 chunks; ids and metadata (incl. every `grp_*`) identical | 65 = 65; ids identical; 0 chunks with differing metadata; 0 differing `grp_*` flags | **met** |
+| P2 | Embeddings identical | max abs diff **0.0** | **met** |
+| P3 | Top-8 ids, order and distances identical for all 25 questions | 25/25 identical | **met** |
+| P4 | Q1-Q25 v1: 25/25, 0 leaks, 8/8 conflicts, 0 false notes | 25/25, 0 leaks, 8/8, 0 | **met** |
+| P5 | Q5 x20 guard OFF: at least 19/20; guard repairs in normal run: 0 | **20/20** guard off; guard on 20/20 with **0 repairs**; full run repairs=0, blocked=0 | **met** |
+| P6 | Input tokens shift slightly **down**, about -2% (range -6% to +2%) | 26,005 -> 26,038 (**+0.1%**, +33 tokens); output tokens 4,803 -> 4,712 | **missed on direction**: essentially flat, inside the stated range |
+
+**P6 finding:** original text removes the spaces around punctuation but keeps markdown markers (`**`, `|`, `#`) and line breaks, and the net effect on the model's input is about zero. There is no token saving to expect from this change.
+
+### Q5 (n=20 each, prompt v1)
+
+| Index | Guard | Exact address intact |
+|---|---|---|
+| old (decoded text) | off | **18/20** (`q5_oldindex_guard_off.json`) |
+| new (original text) | off | **20/20** (`q5_7b2_guard_off.json`) |
+| new (original text) | on | 20/20, 0 repaired (`q5_7b2_guard_on.json`) |
+
+18/20 vs 20/20 is small-n and is not significant on its own. The stronger evidence is the mechanism: on the new index the model's context contains `security@northwind.example` verbatim, so there is nothing to copy wrongly, and the repair path never fires. The guard stays as a backstop.
+
+### Verification summary
+
+- Per-chunk: all 65 new documents are non-empty and a true substring of their source (after the heading); original casing, punctuation and markdown are kept (3 sample chunks, including the security-contact chunk, in the run output).
+- Unit tests: `scripts/test_chunk_offsets.py` (7: heading kept, overlap present, no empty chunk, substring of source, casing/punctuation preserved, non-ASCII, **embed_text/sections/ids identical to the current real index**, token-cap semantics unchanged; max re-encoded tokens of the original text 189 vs cap 256). Guard tests 27 passed (23 earlier + 4 original-case cases, including the repair target being the chunk's own string and casing).
+- Leak scan and citation checks do not read chunk text: citations are checked against `{chunk["source"]}` (`app/answer.py`), and the leak scan compares model output with labels built from `access.json` and document titles (`_restricted_labels`). The only consumers of `chunk["text"]` are the prompt context block and the exact-string guard.
+- Scratch-index runs: Q1-Q25 25/25; edge cases 30 PASS + 2 documented findings (Spanish, Japanese); `verify_phase5_ui` exit 0; audit exit 0.
+- **Real-index swap: PENDING** (approved, not yet performed at the time of this commit). Replacing the real index. Procedure: back up `chroma_db/`, re-run `python -m ingest.index` with the real path (upsert by the same ids), re-run `compare_indexes.py` against the backup, re-run the evals.

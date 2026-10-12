@@ -41,7 +41,9 @@ import app.answer as answer_mod  # noqa: E402
 import app.retrieve as retrieve_mod  # noqa: E402
 from evals.run_evals import allowed_sources, load_documents as load_access_docs, restricted_labels  # noqa: E402
 
-REAL_CHROMA = ROOT / "chroma_db"
+# Index used for the live cases. Defaults to the real index (read-only); set
+# EDGE_CASES_CHROMA_PATH to run them against another index, e.g. a scratch re-ingest.
+REAL_CHROMA = Path(os.environ.get("EDGE_CASES_CHROMA_PATH", str(ROOT / "chroma_db")))
 COLLECTION = "knowledge_chunks"
 REFUSAL = answer_mod.REFUSAL_MESSAGE
 RESULTS: list[dict[str, str]] = []

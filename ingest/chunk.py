@@ -15,9 +15,10 @@ HEADING_PATTERN = re.compile(r"^(#{1,6})[ \t]+(.+?)\s*$")
 
 @dataclass(frozen=True)
 class TextChunk:
-    text: str
+    text: str          # original source span (heading + body as written): stored and shown to the model
     section: str
-    token_count: int
+    token_count: int   # measured on embed_text, exactly as before
+    embed_text: str    # tokenizer-decoded text: the unchanged embedding input
 
 
 def _sections(text: str, title: str) -> list[tuple[str, str, str]]:
@@ -69,6 +70,11 @@ def chunk_document(
         body_ids = tokenizer.encode(body, add_special_tokens=False)
         if not body_ids:
             continue
+        # Character offsets of every body token, to recover the original text of a token window.
+        encoded = tokenizer(body, add_special_tokens=False, return_offsets_mapping=True)
+        offsets = encoded["offset_mapping"]
+        if list(encoded["input_ids"]) != list(body_ids) or len(offsets) != len(body_ids):
+            raise ValueError(f"{document.source}: tokenizer offsets do not align with token ids")
 
         body_capacity = max_tokens - special_token_count - heading_token_count
         if body_capacity < 1:
@@ -91,7 +97,9 @@ def chunk_document(
                 raise ValueError(f"{document.source}: unable to fit content under {max_tokens} tokens")
 
             assert count <= max_tokens, f"{document.source}: chunk has {count} tokens (limit {max_tokens})"
-            chunks.append(TextChunk(chunk_text, section, count))
+            original_span = body[offsets[start][0]:offsets[end - 1][1]]
+            original_text = (heading + original_span).strip()
+            chunks.append(TextChunk(original_text, section, count, chunk_text))
             if end == len(body_ids):
                 break
             start = max(start + 1, end - overlap)

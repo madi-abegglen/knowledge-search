@@ -97,6 +97,53 @@ def test_decoded_chunk_does_not_accept_longer_or_different_strings() -> None:
         assert guard(text, chunks=DECODED).action == ACTION_BLOCKED, text
 
 
+# ---------------------------------------------------------------- unit: original-case chunks (7b2)
+# After 7b2 the stored chunk text is the original source span, so it keeps its casing and has no
+# stray spaces. The repair target is the chunk's own string, in the chunk's casing.
+ORIGINAL = [
+    "## 4. Contacts\nWrite to Compliance.Desk@Northwind.example for policy questions, or open "
+    "https://Portal.Northwind.example/IT/Help in your browser.",
+]
+
+
+def test_original_case_chunk_repair_target_is_the_chunks_own_string() -> None:
+    cases = {
+        "compliance.desk @ northwind. example": "Compliance.Desk@Northwind.example",
+        "compliance.desk@northwind.example": "Compliance.Desk@Northwind.example",   # case-only difference
+        "COMPLIANCE.DESK@NORTHWIND.EXAMPLE": "Compliance.Desk@Northwind.example",
+    }
+    for given, target in cases.items():
+        result = guard(f"Write to {given} today.", chunks=ORIGINAL)
+        assert result.action == ACTION_REPAIRED, (given, result)
+        assert result.answer == f"Write to {target} today.", result.answer
+    url = guard("Open https: //portal. northwind.example / it / help to continue.", chunks=ORIGINAL)
+    assert url.action == ACTION_REPAIRED
+    assert url.answer == "Open https://Portal.Northwind.example/IT/Help to continue.", url.answer
+
+
+def test_known_limitation_spaces_inside_the_local_part_fail_closed() -> None:
+    # Spaces are tolerated around '@', '.', '/' in the domain/URL, not inside the local part
+    # (a spaced hyphen is ordinary prose: "email - security@..."). Fails closed (blocked).
+    assert guard("Write to compliance . desk @ northwind. example today.", chunks=ORIGINAL).action == ACTION_BLOCKED
+    # ...and prose with a spaced dash before a verbatim address is untouched
+    assert guard(f"Contact us - {EMAIL} today.").action == ACTION_NONE
+
+
+def test_original_case_chunk_verbatim_string_is_untouched() -> None:
+    for text in ("Write to Compliance.Desk@Northwind.example for details.",
+                 "Open https://Portal.Northwind.example/IT/Help, then sign in.",
+                 "Write to Compliance.Desk@Northwind.example. Do not forward it."):
+        result = guard(text, chunks=ORIGINAL)
+        assert result.action == ACTION_NONE and result.answer == text, (text, result)
+
+
+def test_original_case_chunk_still_blocks_unknown_and_longer_strings() -> None:
+    for text in ("Write to other.desk@northwind.example today.",
+                 "Write to Compliance.Desk@Northwind.example.com today.",
+                 "Open https://portal.northwind.example/it/help/admin now."):
+        assert guard(text, chunks=ORIGINAL).action == ACTION_BLOCKED, text
+
+
 # ---------------------------------------------------------------- unit: untouched
 def test_exact_email_and_url_untouched() -> None:
     for text in (f"Email {EMAIL} today.", f"Email {EMAIL}. Do not click links.", f"({EMAIL})",

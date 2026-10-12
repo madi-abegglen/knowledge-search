@@ -1,0 +1,943 @@
+{
+  "run_name": "q5_7b2_guard_off",
+  "timestamp": "2026-10-12T06:01:46.015409+00:00",
+  "model": "claude-sonnet-5-5",
+  "prompt": {
+    "file": "answer_v1.md",
+    "version": "1"
+  },
+  "repeats": 20,
+  "summary": {
+    "5": {
+      "passes": 20,
+      "runs": 20,
+      "conflict_notes": 0,
+      "must_contain_ok": 20
+    }
+  },
+  "leaks": 0,
+  "results": {
+    "5": [
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, using the \"Report Phish\" button in your email client, or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2652.1,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2346.9,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2211.2,
+        "input_tokens": 1027,
+        "output_tokens": 246,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security tells you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2232.0,
+        "input_tokens": 1027,
+        "output_tokens": 245,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately (within 1 hour) by using the \"Report Phish\" button in your email client, or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence: do not delete the message or reboot your device unless Security instructs you to. Prompt reporting is always appreciated, even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2284.2,
+        "input_tokens": 1027,
+        "output_tokens": 249,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2272.6,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security tells you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2298.4,
+        "input_tokens": 1027,
+        "output_tokens": 246,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately (within 1 hour) by using the \"Report Phish\" button in your email client, or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence: do not delete the message or reboot your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2208.1,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2198.8,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately (within 1 hour) by clicking the \"Report Phish\" button in your email client, or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security tells you to. Prompt reporting is always appreciated, even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2268.7,
+        "input_tokens": 1027,
+        "output_tokens": 251,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is always appreciated, even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2233.3,
+        "input_tokens": 1027,
+        "output_tokens": 249,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, using the \"Report Phish\" button in your email client, or by emailing security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2298.9,
+        "input_tokens": 1027,
+        "output_tokens": 246,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, using the \"Report Phish\" button in your email client, or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2243.4,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2259.4,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report a phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2221.1,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, using the \"Report Phish\" button in your email client, or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security tells you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2197.6,
+        "input_tokens": 1027,
+        "output_tokens": 246,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. If you already clicked a link, report it anyway, since prompt reporting is always appreciated.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2302.6,
+        "input_tokens": 1027,
+        "output_tokens": 253,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2163.3,
+        "input_tokens": 1027,
+        "output_tokens": 246,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2130.9,
+        "input_tokens": 1027,
+        "output_tokens": 247,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report the phishing email immediately, within 1 hour, by using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click any links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless Security instructs you to. If you already clicked a link, report it anyway, since prompt reporting is always appreciated.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 2308.8,
+        "input_tokens": 1027,
+        "output_tokens": 253,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "none",
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      }
+    ]
+  }
+}

@@ -46,12 +46,13 @@ def main() -> None:
         for document, chunks in chunks_by_document
         for index, chunk in enumerate(chunks)
     ]
-    texts = [chunk.text for _, _, chunk in flat_chunks]
+    texts = [chunk.text for _, _, chunk in flat_chunks]              # stored document: original text
+    embed_texts = [chunk.embed_text for _, _, chunk in flat_chunks]  # embedding input: unchanged
     token_counts = [chunk.token_count for _, _, chunk in flat_chunks]
     assert all(count <= MAX_TOKENS for count in token_counts)
 
     vectors = model.encode(
-        texts,
+        embed_texts,
         convert_to_numpy=True,
         normalize_embeddings=True,
         show_progress_bar=False,
