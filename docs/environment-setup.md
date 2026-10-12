@@ -96,13 +96,11 @@ If `--only-binary` fails for a package with no wheel for this Python version, **
 
 ### 3a. Vulnerability audit
 ```bash
-python -m pip install pip-audit
+python -m pip install --only-binary=:all: -r requirements-dev.txt
 python -m pip_audit -r requirements.txt
+python -m pip_audit -r requirements-dev.txt
 ```
-Install pip-audit **inside the repo `.venv`** with the explicit interpreter (never the system or user-site Python), and keep it out of the runtime lockfile:
-```bash
-python -m pip install --only-binary=:all: -r requirements-dev.in
-```
+Install pip-audit **inside the repo `.venv`** with the explicit interpreter (never the system or user-site Python). Its pins live in `requirements-dev.txt`, which is kept separate from the runtime lock `requirements.txt` (see `docs/lockfiles.md`; `python scripts/check_env.py --audit` audits both files). To recreate the audit pins from their inputs: `python -m pip install --only-binary=:all: -r requirements-dev.in`.
 **Check:** no *unreviewed* vulnerabilities. If new ones appear, show them to the user and propose a fix; don't unpin or remove packages silently. (pip-audit only knows about *reported* issues; it doesn't prove a package is clean.)
 
 **Accepted risks:** where no fixed version exists, the user may accept a finding only if the stated reason holds. Accepted items live in `scripts/audit_exceptions.txt` (`ID | reason`), are reported as WARN (never PASS), and are re-reviewed whenever a fixed version is published. **Only the user adds lines to that file.** Currently accepted: four ChromaDB server-side advisories (CVE-2026-45829, -45830, -45831, -45833), valid only while ChromaDB is used embedded-only; `check_env.py` fails if server or HTTP-client usage appears in the code. Before accepting any new finding, look up what it affects and ask the user.

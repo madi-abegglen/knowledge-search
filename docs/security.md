@@ -32,7 +32,7 @@ pip-audit reports four ChromaDB advisories on 1.5.9, which is the newest release
 
 ## Ongoing habits
 - Run `python scripts/check_env.py --audit` before each phase commit and before any demo. It covers the active venv, lockfile encoding and completeness, security minimum versions, known typosquats, `.env` handling, secrets not tracked by git, and pip-audit.
-- Review `requirements.txt` diffs before committing; unexpected new packages are a red flag.
+- Review `requirements.txt` and `requirements-dev.txt` diffs before committing; unexpected new packages are a red flag. `--audit` runs pip-audit against both files with the same accepted exceptions.
 - Never `pip install` a package suggested by a chat or search result without checking the exact spelling on pypi.org.
 
 ## If something looks wrong (worm indicators, unexpected hooks, odd network calls)

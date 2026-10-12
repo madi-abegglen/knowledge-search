@@ -95,7 +95,7 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 ### 7b3. Small cleanups
 - [x] A. Missing/blank `MODEL_NAME` or `ANTHROPIC_API_KEY`: distinct config error state (startup and query time), no model call, nothing sensitive shown or logged.
 - [x] B. Prompt front matter `model` placeholder replaced; rendered system prompt byte-identical (v1 and v2).
-- [ ] C. Lockfile rebuild from a clean venv with a runtime / dev split: **pending approval** (`docs/lockfile-proposal.md`; the working venv and committed `requirements.txt` are unchanged).
+- [x] C. Lockfile split into runtime (`requirements.txt`, 118) and audit tooling (`requirements-dev.txt`, 16) with **no version changes**; `check_env.py --audit` audits both files with the same accepted exceptions and still bites (`scripts/test_audit_bites.py`). The 15 drifted packages are listed as available upgrades, deferred to a separate cycle with a full eval run (`docs/lockfiles.md`).
 
 ### 7c. Runbook and README
 - [ ] `docs/runbook.md`: symptom, likely cause, fix. Include: stale answers (re-ingest), wrong docs (tune chunking/top-k), **leak (disable app, audit metadata and filters)**, JSON failures (check prompt version).

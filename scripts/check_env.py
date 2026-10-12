@@ -191,21 +191,32 @@ def check_chroma_embedded_only():
         record("PASS", "ChromaDB used embedded-only (no server or HTTP client in code)")
 
 
+AUDITED_LOCKFILES = ("requirements.txt", "requirements-dev.txt")  # runtime lock + audit-tooling lock
+
+
 def run_audit():
     exceptions = load_exceptions()
-    cmd = [sys.executable, "-m", "pip_audit", "-r", "requirements.txt"]
-    for vuln_id in exceptions:
-        cmd += ["--ignore-vuln", vuln_id]
-    res = subprocess.run(cmd, cwd=ROOT)
-    if res.returncode == 0 and not exceptions:
+    failed = []
+    for lockfile in AUDITED_LOCKFILES:
+        if not (ROOT / lockfile).is_file():
+            print("pip-audit: %s is missing" % lockfile)
+            failed.append(lockfile)
+            continue
+        cmd = [sys.executable, "-m", "pip_audit", "-r", lockfile]
+        for vuln_id in exceptions:                      # same accepted exceptions, applied to both
+            cmd += ["--ignore-vuln", vuln_id]
+        res = subprocess.run(cmd, cwd=ROOT)
+        if res.returncode != 0:
+            failed.append(lockfile)
+    if not failed and not exceptions:
         record("PASS", "pip-audit reported no known vulnerabilities")
-    elif res.returncode == 0:
+    elif not failed:
         record("WARN", "pip-audit clean except %d documented, accepted exception(s): %s "
                        "(see docs/security.md; re-review when a fixed version is published)"
                % (len(exceptions), ", ".join(exceptions)))
     else:
-        record("FAIL", "pip-audit reported NEW findings or failed to run; review the output above. "
-                       "Do not add exceptions without the user's approval.")
+        record("FAIL", "pip-audit reported NEW findings or failed to run for: %s; review the output above. "
+                       "Do not add exceptions without the user's approval." % ", ".join(failed))
 
 
 def main():
