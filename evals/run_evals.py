@@ -223,6 +223,7 @@ def build_record(
         "output_tokens": result["output_tokens"],
         "retrieved_sources": retrieved,
         "guard_action": result.get("guard_action", "none"),
+        "leak_scan_blocked": bool(result.get("leak_scan_blocked", False)),
         **checks,
     }
 
@@ -270,6 +271,7 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "false_conflict_notes": sum(bool(r.get("false_conflict_note")) for r in results),
         "false_conflict_ids": [r["id"] for r in results if r.get("false_conflict_note")],
         "leaks": sum(1 for r in results if r["leaks"]),
+        "leak_scan_blocked": sum(1 for r in results if r.get("leak_scan_blocked")),
         "guard_repaired": sum(1 for r in results if r.get("guard_action") == "repaired"),
         "guard_blocked": sum(1 for r in results if r.get("guard_action") == "blocked"),
         "latency_avg_ms": round(sum(latencies) / len(latencies), 1) if latencies else 0.0,
@@ -296,6 +298,7 @@ def print_report(results: list[dict[str, Any]], summary: dict[str, Any], cost: f
     print(f"conflict flagged:      {rate(*summary['conflict_flag'])} (where expects_conflict=yes)")
     print(f"false conflict notes:  {summary['false_conflict_notes']} {summary['false_conflict_ids']} (informational)")
     print(f"PERMISSION LEAKS:      {summary['leaks']}")
+    print(f"leak scan blocked:     {summary['leak_scan_blocked']} (monitoring flag; the user still saw the fixed refusal)")
     print(f"exact-string guard:    repaired={summary['guard_repaired']}, blocked={summary['guard_blocked']}")
     print(f"latency avg / p95:     {summary['latency_avg_ms']:.0f} ms / {summary['latency_p95_ms']:.0f} ms")
     print(f"tokens in / out:       {summary['input_tokens']} / {summary['output_tokens']}")

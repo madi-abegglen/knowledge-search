@@ -42,7 +42,7 @@ works, but `check_env.py` then wrongly reports "API key looks unset".
 | `PRICE_INPUT_PER_MTOK`, `PRICE_OUTPUT_PER_MTOK` | no | blank | USD per million tokens. Used for `cost_usd` in the query log and in eval cost. Blank means cost is `null` ("N queries without a price" in the report). |
 | `DAILY_COST_LIMIT_USD` | no | blank | Daily spend limit for the report's cost alert. Blank disables that alert (the report says so). |
 | `QUERY_LOG_SALT` | no | blank | Salt for the question hash in the query log. See section 9. |
-| `PROMPT_VERSION` | no | `1` | Which `prompts/answer_v{N}.md` the app uses (digits only; anything else raises an error that surfaces as "Something went wrong. Try again."). **Not listed in `.env.example`**; the default is v1 and v2 is a candidate only (see `docs/eval-results.md`, "Prompt default"). |
+| `PROMPT_VERSION` | no | `1` | Which `prompts/answer_v{N}.md` the app uses (digits only; anything else raises an error that surfaces as "Something went wrong. Try again."). Listed in `.env.example` as `PROMPT_VERSION=1`; v2 is a candidate only (see `docs/eval-results.md`, "Prompt default"). |
 
 Check settings without revealing them: `.\.venv\Scripts\python.exe scripts\check_env.py` prints `API key is set in
 .env (value not shown)`.
@@ -96,7 +96,7 @@ STATUS: ALERT
 
 | Alert | Fires when | Likely causes | First check | Action |
 |---|---|---|---|---|
-| `LEAK_SCAN_BLOCKED` (**CRITICAL**) | any query had `leak_scan_blocked: true` | (a) **known false positive**: a refusal whose wording echoes a restricted title the user asked about (see below); (b) a real problem: a restricted chunk reached the model (wrong `grp_*` metadata or filter) or the model named a restricted document | `scripts\diagnose_leak_scan.py` on a similar question: is the outcome `refuse` and the matched label a rephrasing of the user's own words (a), or `answer` / a label the user never mentioned (b)? Then `scripts\verify_ingest.py` | (a): note it; the user only ever saw the fixed refusal. (b): treat as an incident: stop the app, audit `data\access.json`, re-ingest, re-run `edge_cases.py` permissions group and the Q10/Q11/Q13 evals; do not restart until clean |
+| `LEAK_SCAN_BLOCKED` (**CRITICAL**) | any query had `leak_scan_blocked: true` | a restricted file name or title appeared in text that could reach the user (answer, note, clarifying question or citation); the user got the fixed refusal. Causes: a restricted chunk reached the model (wrong `grp_*` metadata or filter), the model volunteered a restricted document name, or a permitted answer legitimately contains a phrase equal to a restricted title (not observed) | `scripts\diagnose_leak_scan.py` on a similar question prints which labels matched and in which outcome; then `scripts\verify_ingest.py` | treat as an incident until explained: stop the app if a restricted chunk could have been retrieved, audit `data\access.json`, re-ingest, re-run the `edge_cases.py` permissions group and the Q10/Q11/Q13 evals; restart only when clean |
 | `ERROR_RATE` (warning, over 5%) | error outcomes / all queries | API outage or rate limit, expired or wrong key, timeouts (30 s, one retry) | count error types: `Get-Content logs\query_log.jsonl \| ConvertFrom-Json \| Group-Object error_type` | see section 4; wait out an outage; fix the key |
 | `CONSECUTIVE_ERRORS` (warning, 3 in a row) | 3 or more `error` outcomes consecutively (any sample size) | same as above, usually fast to appear | one query through the CLI: `.\.venv\Scripts\python.exe -m app.answer --user employee "How many PTO days do new hires get?"` and read `error_type` | same as above |
 | `P95_LATENCY` (warning, over 10 s) | p95 of `latency_ms` | slow API, retries, cold start after a restart, very long questions | compare p50 vs p95; look for a restart just before; check API status | usually transient; if persistent, check tokens in/out and the 2,000-character cap |
@@ -104,13 +104,13 @@ STATUS: ALERT
 | `DAILY_COST` (warning) | any UTC day's `cost_usd` above `DAILY_COST_LIMIT_USD` | traffic, long prompts, prompt v2 (+13% input tokens), a retry loop | report per-day cost; tokens in/out | owner decides: raise the limit or investigate abuse |
 | `GUARD_BLOCKED_RISING` (warning, never critical) | blocked count above 0 and above the previous window | the model is emitting an email or URL that is not in the permitted context | the log never stores the string; reproduce with `evals.run_evals --only 5 --repeat 20` and a few email/URL questions | usually model behavior; if it keeps rising, review the prompt version |
 
-**Known false positive for `LEAK_SCAN_BLOCKED`.** The scan runs on the model's refusal text too. When a user asks
-about a restricted document in words close to its title, the model's refusal often repeats that phrase ("does not
-contain any information about an executive bonus structure"), the scan matches the restricted title, and the flag
-is set. The user still sees only the fixed "I couldn't find that." Measured by `diagnose_leak_scan.py --all-eval`:
-1 of 25 eval questions (Q10, "What's the exec bonus structure?"). Until fixed (see `docs/build-plan.md`, 7b list)
-this CRITICAL alert can fire during normal use; the logged outcome is `refuse` in both the false-positive and the
-real case, so use the diagnosis tool, not the log alone.
+**What `LEAK_SCAN_BLOCKED` covers.** The scan checks only model-written text that a user can see: `answer`,
+`conflict_note`, `clarifying_question` and the citation source and section. It does **not** scan a refusal:
+refusals always show the fixed "I couldn't find that." and carry no model text. Before 7d it did scan refusal
+wording, which flagged refusals that merely repeated a restricted title the user had asked about (1 of 25 eval
+questions, Q10); that false positive is fixed (`docs/eval-results.md`, "Hardening (7d)"), so a flag now means a
+restricted name really was in visible output. A line in the log from before 7d with `leak_scan_blocked: true` and
+`outcome: refuse` may be that old false positive.
 
 ## 4. Error states: what users see, what is logged
 
@@ -120,7 +120,7 @@ real case, so use the diagnosis tool, not the log alone.
 | API failure | red: "Service unavailable. Please try again." | `outcome: error`, `error_type` = exception class name, e.g. `APITimeoutError`, `APIConnectionError`, `RateLimitError`, `AuthenticationError`, `InternalServerError` | provider status; key validity; network |
 | Question too long | yellow: "Please shorten your question (2,000 characters max)." | `outcome: invalid_input`, 0 tokens | nothing to fix |
 | No answer / restricted / not in docs | "REFUSED" with "I couldn't find that." (identical for all three causes) | `outcome: refuse` | see `retrieved_count` and section 3 |
-| Unexpected exception in the UI | "Something went wrong. Try again." | **not logged**: the UI swallows it | run the CLI query above to reproduce with a traceback |
+| Unexpected exception in the UI | "Something went wrong. Try again." | `outcome: error`, `error_type` = the exception **class name** only (e.g. `ValueError`, `KeyError`); a failure while rendering an answer is logged once as a second `error` line for that query | run the CLI query above to reproduce with a traceback |
 
 Error and invalid-input states show no feedback buttons. Messages are fixed strings, identical for every user and
 query. Exception text, setting names and values are never shown or logged (only the class name).
@@ -243,11 +243,11 @@ Details and evidence: `docs/eval-results.md` and `docs/edge-cases.md`.
   similarity threshold.
 - **Exact-string guard gaps**: `clarifying_question` is not scanned; a capitalized label after a stray ". " and
   spaces inside an email's local part fail closed (blocked).
-- **Leak-scan false positive** on refusals that echo a restricted title (section 3).
 - **The older-version conflict note is written by the model**: the older section is always retrieved and shown
-  to it, but one captured UI run omitted the note (`docs/eval-results.md`, 7c findings, row 8).
+  to it; 20 of 20 repeated runs carried the note, one captured UI run omitted it (`docs/eval-results.md`,
+  "Hardening (7d)"). A deterministic note was judged not warranted.
 - **Tiny corpus and eval set**: 15 documents, 65 chunks, 25 questions; one superseded document pair; the held-out
   questions Q21 to Q24 are not blind and Q25 does not discriminate; the injection test is 3 samples of one style.
 - **Single user, demo access control**: the sidebar user switcher is not authentication; `access.json` is a stand-in
   for source-system ACLs.
-- **Unexpected UI exceptions are not logged** (section 4).
+- **No stack traces in logs**: exceptions are logged by class name only, by design (section 4).

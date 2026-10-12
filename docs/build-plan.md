@@ -91,14 +91,13 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 - [ ] Non-English questions are refused (English-only embedding model; Spanish/Japanese distances 0.74-0.85 vs 0.195). Needs a multilingual model and a re-baseline.
 - [ ] Guard gaps: `clarifying_question` is not scanned; capitalized label after a stray ". " fails closed.
 - [x] Missing `MODEL_NAME` / `ANTHROPIC_API_KEY` looked like "not found". Fixed in 7b3-A: distinct `ConfigError` runtime error state.
-- [ ] Leak scan flags refusals that echo a restricted title (1 of 25 eval questions); can fire the CRITICAL alert in normal use. Fix: do not scan or count refusal text. Needs a full eval cycle (docs/eval-results.md, 7c findings).
-- [ ] Unexpected UI exceptions are swallowed and not logged.
-- [ ] `check_env.py` misreports an API key in a BOM-prefixed `.env`; `PROMPT_VERSION` is missing from `.env.example`.
+- [x] Leak scan flagged refusals that echo a restricted title (1 of 25 eval questions). Fixed in 7d: only user-visible text is scanned (refusals carry none; citation section added); the control still bites (tests).
+- [x] Unexpected UI exceptions are now logged as `outcome: error` with the exception class name only (7d).
+- [x] `check_env.py` reads `.env` as `utf-8-sig`; `PROMPT_VERSION` documented in `.env.example` (7d).
+- [x] `docs/adlc.md` KS-G1..G10 gate table, verified against the code (7d).
 
-### 7b3. Small cleanups
-- [x] A. Missing/blank `MODEL_NAME` or `ANTHROPIC_API_KEY`: distinct config error state (startup and query time), no model call, nothing sensitive shown or logged.
-- [x] B. Prompt front matter `model` placeholder replaced; rendered system prompt byte-identical (v1 and v2).
-- [x] C. Lockfile split into runtime (`requirements.txt`, 118) and audit tooling (`requirements-dev.txt`, 16) with **no version changes**; `check_env.py --audit` audits both files with the same accepted exceptions and still bites (`scripts/test_audit_bites.py`). The 15 drifted packages are listed as available upgrades, deferred to a separate cycle with a full eval run (`docs/lockfiles.md`).
+### 7d. Hardening from the 7c findings (done)
+- [x] Leak-scan scope, UI exception logging, BOM handling, `.env.example`, gate table, descriptive screenshot names; conflict-note rate measured (20/20, deterministic note not warranted). Results: `docs/eval-results.md`, "Hardening (7d)".
 
 ### 7c. Runbook and README (done)
 - [x] `docs/runbook.md`: start/stop, settings, health check and alert response, error states, add/change a document or permission, rollback, dependency cycle, log hygiene, key rotation, limitations. Every command was run or is marked not run.

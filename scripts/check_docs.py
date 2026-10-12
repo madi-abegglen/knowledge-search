@@ -65,7 +65,10 @@ CLAIMS = [
     ("Q5 18/20 vs 20/20", results, "**18/20** (`q5_oldindex_guard_off.json`)"),
     ("Q5 first implementation 0/20", results, "**0/20: all blocked and refused**"),
     ("65 chunks", results, "65 = 65"),
-    ("leak scan 1 of 25 (runbook/README claim is from diagnose_leak_scan; not in eval-results)", None, None),
+    ("leak scan: was 1 of 25 (Q10), now 0 of 25", results, "scan would block 0 of 25"),
+    ("leak scan before: 1 of 25 questions, Q10", results, "**1 of 25** questions"),
+    ("conflict note 20/20 in the PTO measurement", results, "| **Answers with a conflict note** | **20/20** |"),
+    ("hardening P1 met", results, "| P1 | `leak_scan_blocked` over Q1-Q25 falls from 1 (Q10) to 0 | **0**"),
     ("edge cases 30 PASS 0 FAIL 2 FINDING", edge, "30 PASS, 0 FAIL, 2 FINDING"),
     ("4 restricted vs 4 not-found -> 1 distinct output", edge, "1 distinct output"),
     ("answer accuracy target 80%", problem, ">= 80%"),
@@ -80,7 +83,9 @@ for label, source, needle in CLAIMS:
     else:
         print("PASS ", label)
 
-for must in ("25/25", "18/18", "8/8", "1,978 ms / 3,366 ms", "$0.1000", "30 PASS, 0 FAIL, 2 documented findings"):
+for must in ("25/25", "18/18", "8/8", "1,978 ms / 3,366 ms", "$0.1000", "30 PASS, 0 FAIL, 2 documented findings",
+             "20 of 20", "docs/screenshots/01-initial-load.webp", "docs/screenshots/02-employee-refused.webp",
+             "docs/screenshots/03-exec-answer.webp", "docs/screenshots/04-hr-pto-sources-expanded.webp"):
     if must not in readme:
         fail(f"README is missing expected text: {must}")
 

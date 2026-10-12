@@ -142,7 +142,7 @@ chroma_db_backup*/
 **Check:** `git check-ignore -v .env .venv chroma_db logs` lists every path.
 
 ### 6. Env files
-`.env.example` (committed) lists every setting with placeholders only; see it for the current list (`ANTHROPIC_API_KEY`, `MODEL_NAME`, `CHROMA_PATH`, `EMBED_MODEL`, `LOG_DIR`, `PRICE_INPUT_PER_MTOK`, `PRICE_OUTPUT_PER_MTOK`, `DAILY_COST_LIMIT_USD`, `QUERY_LOG_SALT`) and `docs/runbook.md` section 2 for what each does.
+`.env.example` (committed) lists every setting with placeholders only; see it for the current list (`ANTHROPIC_API_KEY`, `MODEL_NAME`, `CHROMA_PATH`, `EMBED_MODEL`, `LOG_DIR`, `PRICE_INPUT_PER_MTOK`, `PRICE_OUTPUT_PER_MTOK`, `DAILY_COST_LIMIT_USD`, `QUERY_LOG_SALT`, `PROMPT_VERSION`) and `docs/runbook.md` section 2 for what each does.
 Then `cp .env.example .env` (PowerShell: `Copy-Item .env.example .env`; edit it in an editor, because `Set-Content -Encoding utf8` in Windows PowerShell 5.1 adds a BOM that makes `check_env.py` misreport the key). **The user** edits `.env` and pastes their real key.
 **Check:** `.env` exists and differs from `.env.example` in the key line only. Do not print its contents.
 

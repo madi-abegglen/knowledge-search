@@ -38,9 +38,9 @@ def inspect_one(user: str, question: str) -> dict:
         payload = A.AnswerPayload.model_validate_json(raw)
     except Exception as exc:  # unparsable: the real path would retry, then refuse
         return {"parsed": False, "error": type(exc).__name__}
-    spoken = " ".join(x for x in (payload.answer, payload.conflict_note, payload.clarifying_question) if x)
+    spoken = " ".join(A._user_visible_texts(payload))      # same rule as answer.py: refusals show no model text
     typed = question.casefold()
-    hits = sorted(label for label in labels if label in spoken.casefold())
+    hits = A._restricted_hits(payload, labels)
     return {
         "parsed": True,
         "outcome": payload.outcome,

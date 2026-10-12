@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 import sys
+import time
 from typing import Any
 
 import streamlit as st
@@ -55,6 +56,21 @@ def append_feedback(result: dict[str, Any], rating: str) -> None:
         record["question"] = result["question"]
     with feedback_path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def log_unexpected_error(user: str, question: str, exc: Exception, started: float) -> None:
+    """Query-log an unexpected failure: outcome error and the exception CLASS NAME only.
+    The exception text, the question and any answer text are never logged."""
+    log_query(user, question, {
+        "outcome": "error",
+        "error_type": type(exc).__name__,
+        "latency_ms": round((time.perf_counter() - started) * 1000, 1),
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "retrieved_count": 0,
+        "leak_scan_blocked": False,
+        "guard_action": "none",
+    })
 
 
 def record_rating(rating: str) -> None:
@@ -133,6 +149,7 @@ def main() -> None:
         if not question.strip():
             st.info("Type a question first.")
         else:
+            started = time.perf_counter()
             try:
                 with st.spinner("Searching..."):
                     response = answer_question(user, question)
@@ -140,15 +157,19 @@ def main() -> None:
                 st.session_state["result"] = {
                     **response, "user": user, "question": question, "query_id": query_id,
                 }
-            except Exception:
+            except Exception as exc:
                 st.session_state.pop("result", None)
+                log_unexpected_error(user, question, exc, started)
                 st.error(GENERIC_ERROR)
 
     result = st.session_state.get("result")
     if result and result.get("user") == user:
         try:
             render_result(result)
-        except Exception:
+        except Exception as exc:
+            if not result.get("render_error_logged"):       # once per result, not on every rerun
+                result["render_error_logged"] = True
+                log_unexpected_error(user, result.get("question", ""), exc, time.perf_counter())
             st.error(GENERIC_ERROR)
 
 

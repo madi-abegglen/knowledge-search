@@ -40,9 +40,9 @@ Key properties:
   them (one boolean metadata flag per group, `grp_all`, `grp_hr`, `grp_finance`, `grp_sales`, `grp_exec`).
 - **Three outcomes only**: answer, refuse, clarify. The model returns JSON validated against a strict schema.
 - **Source versions**: current documents are preferred, and when an older version of the same section differs, the
-  answer usually carries a note saying so (e.g. 20 PTO days now, 15 in the superseded 2023 policy). The older
-  section is always put in front of the model; whether the model writes the note is its call (see the PTO
-  screenshots below).
+  answer carries a note saying so (e.g. 20 PTO days now, 15 in the superseded 2023 policy). The older section is
+  always put in front of the model and the model writes the note: it did in 20 of 20 repeated runs of the PTO
+  question, but one captured run omitted it, so it is not guaranteed (`docs/eval-results.md`, "Hardening (7d)").
 - **Retrieved text is treated as data, not instructions** (delimited in the prompt, escaped, and covered by a small
   injection test).
 
@@ -65,7 +65,7 @@ distinct visible output (see `docs/edge-cases.md`).
 
 | As | Ask | Expected |
 |---|---|---|
-| `employee` | How many PTO days do new hires get? | 20 days, cited to the 2025 policy, usually with a note that the superseded 2023 policy said 15 |
+| `employee` | How many PTO days do new hires get? | 20 days, cited to the 2025 policy, with a note that the superseded 2023 policy said 15 (written by the model, 20 of 20 runs) |
 | `employee` | What's the exec bonus structure? | "I couldn't find that." |
 | `exec_user` | What's the CEO's target bonus? | 100% of base salary, with citation |
 | `employee` | that vacation thing | a clarifying question |
@@ -77,23 +77,24 @@ Captured from the running app (dark theme). The sidebar shows which demo user is
 
 **Initial load** (`employee`): the user switcher, the question box and the Ask button.
 
-![Initial load of the Knowledge Search app: sidebar user switcher set to Eli Employee, an empty question box and an Ask button](docs/screenshots/1791772563548_image.webp)
+![Initial load of the Knowledge Search app: sidebar user switcher set to Eli Employee, an empty question box and an Ask button](docs/screenshots/01-initial-load.webp)
 
 **Refusal** (`employee` asks "what's the bonus for executives?"): outcome REFUSED with the fixed text "I couldn't
 find that." and no source list, no hint that a restricted document exists.
 
-![Knowledge Search as Eli Employee: the question "what's the bonus for executives?" returns outcome REFUSED and the text "I couldn't find that." with thumbs up and thumbs down buttons](docs/screenshots/1791772600340_image.webp)
+![Knowledge Search as Eli Employee: the question "what's the bonus for executives?" returns outcome REFUSED and the text "I couldn't find that." with thumbs up and thumbs down buttons](docs/screenshots/02-employee-refused.webp)
 
 **Executive answer** (`exec_user`, the same question): outcome ANSWER with the bonus targets and a collapsed
 Sources section.
 
-![Knowledge Search as Eva Executive: the same question returns outcome ANSWER describing executive bonus targets as a percentage of base salary and how payouts are weighted, with a collapsed Sources expander](docs/screenshots/1791772650819_image.webp)
+![Knowledge Search as Eva Executive: the same question returns outcome ANSWER describing executive bonus targets as a percentage of base salary and how payouts are weighted, with a collapsed Sources expander](docs/screenshots/03-exec-answer.webp)
 
 **PTO answer with Sources expanded** (`hr_user`): 20 PTO days for new hires, cited to two sections of
 `hr_pto_policy_2025.md`. No conflict note appears in this captured run even though the older 2023 section was in the
-model's context (retrieval is identical for all three demo users), so the note is not guaranteed.
+model's context (retrieval is identical for all three demo users). It was not reproduced in 20 repeated runs
+(all 20 carried a note), so it is an occasional omission, and the note is not guaranteed.
 
-![Knowledge Search as Hana HR: "How many PTO days do new hires get?" returns outcome ANSWER with 20 PTO days per year, and the expanded Sources list shows hr_pto_policy_2025.md sections 3 Annual PTO allotment and 2 Eligibility](docs/screenshots/1791772989237_image.webp)
+![Knowledge Search as Hana HR: "How many PTO days do new hires get?" returns outcome ANSWER with 20 PTO days per year, and the expanded Sources list shows hr_pto_policy_2025.md sections 3 Annual PTO allotment and 2 Eligibility](docs/screenshots/04-hr-pto-sources-expanded.webp)
 
 ## Quickstart (Windows PowerShell)
 
@@ -194,11 +195,12 @@ so rows are not strictly comparable):
 
 - **Non-English questions are refused** (English-only embedding model). Next: a multilingual model, then re-baseline.
 - **No relevance cutoff**: refusal depends on the model, not a similarity threshold.
-- **A monitoring false positive**: the leak-scan alert can fire on a refusal that repeats a restricted title the user
-  asked about (1 of 25 eval questions). The user still sees only the fixed refusal. Next: stop scanning refusal text.
+- **The leak scan counts only text a user can see** (it no longer flags a refusal that repeats a restricted title;
+  that false positive was 1 of 25 eval questions and is fixed). Any restricted title or file name in an answer,
+  note, clarifying question or citation is still blocked and flagged.
 - **Single user, demo access control**: no SSO; `data/access.json` stands in for source-system ACLs, which a real
   system would mirror at query time.
-- **Guard gaps** (`clarifying_question` not scanned; some odd spacings fail closed) and 15 deferred dependency
+- **Guard gaps** (the exact-string guard does not check `clarifying_question`; some odd spacings fail closed) and 15 deferred dependency
   upgrades (`docs/lockfiles.md`).
 - **Not built**: hybrid retrieval (BM25 + reranker), live sync with a document source, a chat-tool interface.
 

@@ -132,7 +132,8 @@ def check_env_file():
         record("FAIL", ".env is missing (copy .env.example and add your key)")
         return
     key_ok = False
-    for line in env.read_text(encoding="utf-8", errors="ignore").splitlines():
+    # utf-8-sig: an editor or PowerShell 5.1 may write a BOM; it must not hide the first key
+    for line in env.read_text(encoding="utf-8-sig", errors="ignore").splitlines():
         if line.startswith("ANTHROPIC_API_KEY="):
             val = line.split("=", 1)[1].strip().strip("'\"")
             key_ok = val.startswith("sk-") and "your-key" not in val

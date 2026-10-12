@@ -133,14 +133,30 @@ def _restricted_labels(user: str) -> set[str]:
     return {label for label in labels if label}
 
 
+def _user_visible_texts(payload: AnswerPayload) -> list[str]:
+    """Model-written text that can reach the user for this payload.
+
+    A refusal is returned through `_refusal`, which carries only the fixed REFUSAL_MESSAGE, so
+    nothing the model wrote on a `refuse` is ever shown and nothing is scanned. For every other
+    outcome the result carries `answer`, `conflict_note`, `clarifying_question` and the citation
+    `source` / `section` strings (the UI shows the sources list), so all of them are scanned.
+    """
+    if payload.outcome == "refuse":
+        return []
+    texts: list[str | None] = [payload.answer, payload.conflict_note, payload.clarifying_question]
+    for citation in payload.citations:
+        texts.extend([citation.source, citation.section])
+    return [text for text in texts if text]
+
+
+def _restricted_hits(payload: AnswerPayload, restricted_labels: set[str]) -> list[str]:
+    """Restricted labels (file names / titles) that appear in user-visible model text."""
+    visible = [text.casefold() for text in _user_visible_texts(payload)]
+    return sorted(label for label in restricted_labels if any(label in text for text in visible))
+
+
 def _mentions_restricted_content(payload: AnswerPayload, restricted_labels: set[str]) -> bool:
-    output_fields = (payload.answer, payload.conflict_note, payload.clarifying_question)
-    return any(
-        label in value.casefold()
-        for value in output_fields
-        if value
-        for label in restricted_labels
-    )
+    return bool(_restricted_hits(payload, restricted_labels))
 
 
 def _result(
@@ -304,10 +320,12 @@ def _answer_question(user: str, question: str, meta: dict[str, Any]) -> dict[str
                 )
             if any(citation.source not in allowed_sources for citation in payload.citations):
                 raise ValueError("citation source was not retrieved")
+            if payload.outcome == "refuse":
+                # Fixed text only: the model's own refusal wording is never shown, so it is not
+                # scanned (scanning it flagged refusals that merely repeated the user's words).
+                return _refusal(started, input_tokens, output_tokens)
             if _mentions_restricted_content(payload, restricted_labels):
                 meta["leak_scan_blocked"] = True
-                return _refusal(started, input_tokens, output_tokens)
-            if payload.outcome == "refuse":
                 return _refusal(started, input_tokens, output_tokens)
             return _result(payload, started, input_tokens, output_tokens)
         except (ValidationError, ValueError, json.JSONDecodeError):

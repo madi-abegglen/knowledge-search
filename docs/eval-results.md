@@ -455,3 +455,103 @@ Fresh-clone verification (clone of `b2e27ef` at a short path, venv from `require
 `CHROMA_PATH`): ingest 65 chunks, `verify_ingest.py` "Verified 15 sources and 65 chunks", CLI queries answered
 (PTO: answer with conflict note; exec bonus as employee: refusal), `test_select_final` 8 and `test_monitoring` 26
 passed, app answered the health check on localhost. The clone and its venv were then deleted.
+
+## Hardening (7d)
+
+No retrieval, chunking, prompt-text or schema change. Fixes for findings 1-4 and 6-7 of "Runbook and README findings
+(7c)", plus a measurement for finding 8. Items: leak-scan scope, logging of unexpected UI exceptions, `check_env.py`
+BOM handling, `PROMPT_VERSION` in `.env.example`, a verified gate table in `docs/adlc.md`, descriptive screenshot names.
+
+### Pre-registered predictions (recorded before any run of the changed code)
+
+| # | Prediction |
+|---|---|
+| P1 | `leak_scan_blocked` over Q1-Q25 (v1, real index) falls from **1 (Q10)** to **0**. |
+| P2 | Outcomes unchanged: **25/25**, 0 permission leaks, 8/8 conflicts flagged, 0 false conflict notes, guard repaired=0 blocked=0. |
+| P3 | The control still bites: a mocked model leaking a restricted title or filename in `answer`, `conflict_note`, `clarifying_question` or a citation `section` is blocked, the fixed refusal is returned, and `leak_scan_blocked` is set. |
+| P4 | No input is changed for a refusal: the user-visible text of every `refuse` result is the fixed `REFUSAL_MESSAGE` whatever the model wrote. |
+| P5 | Input tokens are the same as the last run (26,038): no prompt or retrieval change. |
+| P6 (measurement only) | The conflict note on the PTO question as `hr_user` x20 is present in most runs but not all (one omission was observed in a captured run). No numeric prediction. |
+
+### 7d results vs predictions
+
+Run: `evals/results/after_7d_v1.json` (Q1-Q25, prompt v1, real index, temporary `LOG_DIR`); compared with
+`after_7b3c_v1.json`. `leak_scan_blocked` is a new column in the eval runner; the "before" value comes from
+`scripts/diagnose_leak_scan.py --all-eval` (Q10 flagged in every diagnosis run, three observations including a CLI
+query), because the runner did not record the flag earlier.
+
+| # | Prediction | Result | Verdict |
+|---|---|---|---|
+| P1 | `leak_scan_blocked` over Q1-Q25 falls from 1 (Q10) to 0 | **0**; `diagnose_leak_scan.py --all-eval` now reports "scan would block 0 of 25" | **met** |
+| P2 | 25/25, 0 leaks, 8/8 conflicts, 0 false notes, guard repaired=0 blocked=0 | 25/25, **0 permission leaks**, 8/8, 0, repaired=0 blocked=0; no question worse | **met** |
+| P3 | The control still bites in every visible field | `test_hardening_7d.py`: leak in answer title, answer filename, conflict_note, clarifying_question, citation section and mixed case are each blocked, the fixed refusal is returned, `leak_scan_blocked` is True, and no restricted text is in the result | **met** |
+| P4 | Refusals always show the fixed text | tests: nasty model refusal text (restricted title, filename, script tags, 5,000 characters, empty) and 5 different refusal routes all return identical fixed fields; the UI prints the `REFUSAL_MESSAGE` constant, never result text | **met** |
+| P5 | Input tokens unchanged (26,038) | **26,038** in, 4,787 out | **met** |
+| P6 | Conflict note present in most runs (measurement) | see below | measured |
+
+Other results: suites select_final 8, phase6e_fixes 13, monitoring 26, exact_string_guard 27, chunk_offsets 7,
+config_error 9, hardening_7d 10 (new) all passed; `verify_phase5_ui` exit 0; edge cases 30 PASS + 2 documented
+findings; real index 65 chunks; `data/` fingerprint `82be1429dbfe5dd4`; audit exit 0 (both lock files).
+
+### What changed in the leak scan, and the proof it is still a control
+
+- **Before:** the scan ran on the model's `answer`, `conflict_note` and `clarifying_question` for every outcome,
+  including `refuse`. A refusal such as "the context has nothing about an executive bonus structure" matched the
+  restricted title and set `leak_scan_blocked`, although the refusal text is replaced by the fixed
+  `REFUSAL_MESSAGE` before it reaches anyone. Citation `section` (free model text, shown in the Sources list) was
+  **not** scanned.
+- **Now** (`app/answer.py`: `_user_visible_texts`, `_restricted_hits`): on `refuse` nothing is scanned because
+  `_refusal` returns only constants; for every other outcome the scan covers `answer`, `conflict_note`,
+  `clarifying_question` and each citation `source` and `section`.
+- **Why that is exact:** every route to a refusal goes through `_refusal` (no chunks, model refuse, leak blocked,
+  attempts exhausted), and the UI refuse branch prints the constant. The test compares all routes field by field.
+- The previously unscanned citation `section` is a strict improvement in coverage, found while proving the scope.
+
+### Conflict note measurement (P6; no code change)
+
+The screenshot's question, `hr_user`, "How many PTO days do new hires get?", prompt v1, real index, 20 runs
+(`scripts/measure_conflict_note.py`):
+
+| Measure | Result |
+|---|---|
+| Retrieved | 5 chunks, of which 2 superseded (`hr_pto_policy_2023.md` sections 3 and 4) |
+| Outcomes | answer 20/20; answers containing "20": 20/20 |
+| **Answers with a conflict note** | **20/20** |
+| Distinct note texts | 14 |
+
+Sample notes (verbatim):
+1. "A superseded earlier version of the policy (2023.2) listed 15 days per year for new hires. That value is outdated; the current policy (2025.1) says 20 days."
+2. "A superseded earlier version of the policy (hr_pto_policy_2023.md, version 2023.2) listed 15 days per year for new hires. That value is no longer current."
+3. "The superseded 2023 policy (version 2023.2) listed 15 days per year for new hires. That value is outdated and replaced by the current 20 days."
+
+So the omission in the captured screenshot was not reproduced in 20 runs. With 0 omissions in 20 runs the 95% upper
+bound on the omission rate is about 15% (rule of three); every earlier recorded eval run also flagged Q1, so the true
+rate is probably low but not zero, and one omission was observed.
+
+**Is a deterministic note warranted? Not now.**
+- Code can detect only that an older version of the same (title, section) was retrieved. That happens in 7 of the 20
+  original questions, including unrelated ones (Q6 meals, Q10 exec bonus), where the model correctly stays silent
+  (0 false conflict notes). A code-generated note would add a note to those, or need a semantic comparison of the
+  two values in code, which is fragile.
+- An omission is a quality miss with no permission or correctness impact: the answer still states and cites the
+  current value.
+- Cheaper options exist: keep tracking it with the repeated checks (Q1, Q2, Q22, Q24 x N), and prompt v2 (mandatory
+  note) is available and was neutral on this set.
+- Revisit if repeated measurement shows an omission rate above roughly 5 to 10%, or an answer states the superseded
+  value as current.
+
+### Status of the 7c findings after 7d
+
+| # | Finding | Status |
+|---|---|---|
+| 1 | leak scan flags refusals that echo a restricted title | **fixed** (above) |
+| 2 | unexpected UI exceptions not logged | **fixed**: logged as `outcome: error` with the exception class name only (answer step, and render step once per result); tests |
+| 3 | `check_env.py` misreports a BOM-prefixed `.env` | **fixed**: `.env` read as `utf-8-sig`; test with BOM, no BOM, placeholder, missing key; audit logic untouched |
+| 4 | `PROMPT_VERSION` missing from `.env.example` | **fixed**: `PROMPT_VERSION=1` with a comment |
+| 5 | `test_chunk_offsets.py` hard-coded index path | fixed in 7c |
+| 6 | `docs/adlc.md` cites undefined `KS-G1..G10` | **fixed**: verified table of where each gate is enforced; all ten located, KS-G4 is split across two files |
+| 7 | stale `environment-setup.md` | fixed in 7c; PROMPT_VERSION now listed |
+| 8 | conflict note is the model's choice | **measured**: 20/20; deterministic note not warranted; README wording updated |
+
+Noted, not changed: the exact-string guard also runs on refusal text and could count a spurious `blocked`; it only
+produces a retry and then the same fixed refusal, and was not observed in the 25-question runs.
