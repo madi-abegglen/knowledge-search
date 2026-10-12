@@ -1,6 +1,6 @@
 # Build Plan: Knowledge Search (RAG)
 
-Phases 0-2 are complete. Continue at Phase 3. Each phase ends with a **Done when** check; run it, show the result, stop. Before every phase commit, also run `python scripts/check_env.py --audit` (must exit 0) and show the output.
+Phases 0-5 are complete. Continue at Phase 6. Each phase ends with a **Done when** check; run it, show the result, stop. Before every phase commit, also run `python scripts/check_env.py --audit` (must exit 0) and show the output.
 
 ## Background (how we got here)
 1. The solution was chosen as #2 of the top-5 AI automation ideas by return on value (meeting intelligence, **knowledge search**, AP processing, contract review, recurring reporting).
@@ -8,26 +8,26 @@ Phases 0-2 are complete. Continue at Phase 3. Each phase ends with a **Done when
 3. Alternatives considered: folder conventions, native keyword search, stuff-everything-in-context, **basic RAG (chosen)**, hybrid RAG (upgrade path), off-the-shelf (Glean/Copilot/Claude connectors: benchmark first at work), agentic RAG.
 
 ## Phase 3: Ingestion pipeline
-- [ ] `ingest/load.py`: read `.md`/`.txt`/`.pdf` from `data/`; parse the YAML front-matter (`title, version, effective_date, doc_status`).
-- [ ] `ingest/chunk.py`: split on headings first, then cap at ~200 tokens with ~30 overlap, **hard maximum 256 tokens** (count with the embedding model's tokenizer; `all-MiniLM-L6-v2` truncates beyond 256). Keep the section heading with each chunk (for citations like "HR_Policy §3"). Add an assertion that no chunk exceeds the cap.
-- [ ] `ingest/index.py`: embed with `sentence-transformers`; store in Chroma with metadata `{source, title, chunk_id, section, version, effective_date, doc_status, last_modified}` plus **one boolean field per group** (`grp_all`, `grp_hr`, `grp_finance`, `grp_sales`, `grp_exec`) derived from `allowed_groups` in `data/access.json`. Chroma metadata must be scalar and can't be substring-matched, so don't store a list or delimited string. Phase 4 will filter with `{"$or": [{"grp_<g>": True}, ...]}`.
-- [ ] Deterministic chunk IDs (`<source>::<n>`); upsert so re-runs don't duplicate.
-- [ ] Print chunk counts per file and fail loudly if a doc has no access entry.
+- [x] `ingest/load.py`: read `.md`/`.txt`/`.pdf` from `data/`; parse the YAML front-matter (`title, version, effective_date, doc_status`).
+- [x] `ingest/chunk.py`: split on headings first, then cap at ~200 tokens with ~30 overlap, **hard maximum 256 tokens** (count with the embedding model's tokenizer; `all-MiniLM-L6-v2` truncates beyond 256). Keep the section heading with each chunk (for citations like "HR_Policy §3"). Add an assertion that no chunk exceeds the cap.
+- [x] `ingest/index.py`: embed with `sentence-transformers`; store in Chroma with metadata `{source, title, chunk_id, section, version, effective_date, doc_status, last_modified}` plus **one boolean field per group** (`grp_all`, `grp_hr`, `grp_finance`, `grp_sales`, `grp_exec`) derived from `allowed_groups` in `data/access.json`. Chroma metadata must be scalar and can't be substring-matched, so don't store a list or delimited string. Phase 4 will filter with `{"$or": [{"grp_<g>": True}, ...]}`.
+- [x] Deterministic chunk IDs (`<source>::<n>`); upsert so re-runs don't duplicate.
+- [x] Print chunk counts per file and fail loudly if a doc has no access entry.
 
 **Done when:** `python -m ingest.index` reports chunk counts for all 15 docs, and running it twice leaves the same total.
 
 ## Phase 4: Permission-aware retrieval and answers
-- [ ] `app/retrieve.py`: given `(user, question)`, look up the user's groups, query Chroma for top 8 with a metadata filter so only chunks allowed for those groups return; keep best 5. Prefer `doc_status=current`.
-- [ ] `prompts/answer_v1.md` (+ front-matter): instructs the model to use only provided context, cite sources, and return JSON: `{"outcome": "answer|refuse|clarify", "answer": str, "citations": [{"source","section"}], "conflict_note": str|null, "clarifying_question": str|null}`.
-- [ ] `app/answer.py`: build the prompt, call the API, validate with pydantic; retry once on invalid JSON, then return a safe refusal.
-- [ ] Conflicts: if retrieved chunks include a superseded and a current version of the same doc, answer from current and note the older value.
-- [ ] Refusals must be identical in wording whether the doc doesn't exist or exists but is restricted.
+- [x] `app/retrieve.py`: given `(user, question)`, look up the user's groups, query Chroma for top 8 with a metadata filter so only chunks allowed for those groups return; keep best 5. Prefer `doc_status=current`.
+- [x] `prompts/answer_v1.md` (+ front-matter): instructs the model to use only provided context, cite sources, and return JSON: `{"outcome": "answer|refuse|clarify", "answer": str, "citations": [{"source","section"}], "conflict_note": str|null, "clarifying_question": str|null}`.
+- [x] `app/answer.py`: build the prompt, call the API, validate with pydantic; retry once on invalid JSON, then return a safe refusal.
+- [x] Conflicts: if retrieved chunks include a superseded and a current version of the same doc, answer from current and note the older value.
+- [x] Refusals must be identical in wording whether the doc doesn't exist or exists but is restricted.
 
 **Done when:** `employee` asking about the exec bonus gets a refusal while `exec_user` gets the answer; the PTO question returns 20 days with a citation.
 
 ## Phase 5: Streamlit UI
-- [ ] `app/ui.py`: user dropdown (3 test users), question box, answer, outcome badge, expandable sources, thumbs up/down.
-- [ ] Do not display the names of documents the user cannot access, anywhere in the UI.
+- [x] `app/ui.py`: user dropdown (3 test users), question box, answer, outcome badge, expandable sources, thumbs up/down.
+- [x] Do not display the names of documents the user cannot access, anywhere in the UI.
 
 **Done when:** a 2-minute demo covers Examples A, C, D, E, F.
 

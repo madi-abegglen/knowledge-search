@@ -11,8 +11,8 @@ Full build plan: `docs/build-plan.md`. Problem statement and success metrics: `d
 - [x] Phase 2: 15 sample docs in `data/` + `data/access.json`
 - [x] Phase 3: ingestion pipeline  
 - [x] Phase 4: permission-aware retrieval + 3-outcome answers 
-- [ ] Phase 5: Streamlit UI **<- start here**
-- [ ] Phase 6: evals and edge-case testing
+- [x] Phase 5: Streamlit UI
+- [ ] Phase 6: evals and edge-case testing **<- start here**
 - [ ] Phase 7: monitoring, runbook, README
 
 ## Architecture decisions (already made)
