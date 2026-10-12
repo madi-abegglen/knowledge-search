@@ -87,7 +87,7 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 
 ### 7b. Known weaknesses to address (one per cycle; re-run evals after each retrieval/prompt change)
 - [x] Exact-string guard (`app/guard.py`): emails/URLs in an answer must appear in the permitted chunks; spaced ones are repaired, unknown ones blocked. Q5 20/20, Q1-Q25 25/25, 0 leaks. Found root cause: chunk text is tokenizer-decoded (lowercased, spaced).
-- [ ] **NEXT:** Indexed chunk text is the tokenizer's decoded form (lowercased, spaced punctuation, e.g. `security @ northwind. example`) and is what the model sees. Proper fix: store the original text span per chunk (embed from it); needs re-ingest, the chunk-cap assertion re-checked, and a full re-baseline of the evals.
+- [x] Indexed chunk text was the tokenizer's decoded form (lowercased, spaced punctuation) and is what the model saw. Fixed in 7b2: the original text span per chunk is stored, embeddings and retrieval unchanged (65 chunks, top-8 identical for Q1-Q25); real index swapped; Q5 raw-model 20/20 (was 18/20).
 - [ ] Non-English questions are refused (English-only embedding model; Spanish/Japanese distances 0.74-0.85 vs 0.195). Needs a multilingual model and a re-baseline.
 - [ ] Guard gaps: `clarifying_question` is not scanned; capitalized label after a stray ". " fails closed.
 - [ ] Missing `MODEL_NAME` returns the standard refusal (a configuration error looks like "not found").

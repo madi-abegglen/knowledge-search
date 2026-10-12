@@ -3,10 +3,11 @@
 Why code and not prompt: models occasionally alter exact strings (for example writing
 "security @ northwind. example"). A prompt rule reduces that; a code check removes it.
 
-Important data fact: chunk text is stored as the embedding tokenizer decoded it, so the
-chunks themselves can contain spaced, lowercased strings ("security @ northwind. example").
-Matching therefore removes whitespace on BOTH sides (answer candidate and chunk text), and
-the repair target is the chunk's string with its stray whitespace removed.
+Data fact: before 7b2 the chunk text was stored as the embedding tokenizer decoded it
+(spaced, lowercased: "security @ northwind. example"); since 7b2 it is the original source
+text. Matching removes whitespace on BOTH sides (answer candidate and chunk text) so it works
+on either, and the repair target is the chunk's own string with stray whitespace removed
+(its original casing on a 7b2 index).
 
 Behavior (answer and conflict_note only):
 - The only reference is the PERMITTED retrieved chunks passed to the model.

@@ -84,17 +84,35 @@ def test_overlap_is_present_between_consecutive_windows() -> None:
     assert shared >= 1, "expected overlapping original text between consecutive chunks"
 
 
-def test_boundaries_headings_and_overlap_identical_to_the_current_real_index() -> None:
-    collection = chromadb.PersistentClient(path=str(REAL_CHROMA)).get_collection("knowledge_chunks")
-    stored = collection.get(include=["documents", "metadatas"])
-    old = {cid: (text, meta["section"]) for cid, text, meta in
-           zip(stored["ids"], stored["documents"], stored["metadatas"])}
-    produced = {}
+def _stored(path: Path) -> dict[str, tuple[str, str]]:
+    collection = chromadb.PersistentClient(path=str(path)).get_collection("knowledge_chunks")
+    data = collection.get(include=["documents", "metadatas"])
+    return {cid: (text, meta["section"]) for cid, text, meta in
+            zip(data["ids"], data["documents"], data["metadatas"])}
+
+
+def test_boundaries_headings_and_overlap_identical_to_the_indexed_chunks() -> None:
+    """Ids, sections and chunk windows are unchanged by 7b2.
+
+    - Real index before the swap: stored text == embed_text (decoded).
+    - Real index after the swap:  stored text == text (original).
+    - The pre-7b2 backup (if present) always holds the decoded text == embed_text.
+    """
+    produced_embed, produced_text = {}, {}
     for document in real_documents():
         for index, chunk in enumerate(chunk_document(document, TOKENIZER)):
-            produced[f"{document.source}::{index}"] = (chunk.embed_text, chunk.section)
-    assert produced == old, "embed_text/sections/ids differ from the indexed chunks"
-    assert len(produced) == 65
+            produced_embed[f"{document.source}::{index}"] = (chunk.embed_text, chunk.section)
+            produced_text[f"{document.source}::{index}"] = (chunk.text, chunk.section)
+    assert len(produced_embed) == 65
+
+    stored = _stored(REAL_CHROMA)
+    assert stored in (produced_embed, produced_text), \
+        "real index matches neither the decoded (pre-swap) nor the original (post-swap) chunk text"
+    assert {k: v[1] for k, v in stored.items()} == {k: v[1] for k, v in produced_embed.items()}
+
+    backup = ROOT / "chroma_db_backup_pre7b2"
+    if backup.exists():
+        assert _stored(backup) == produced_embed, "backup differs from the decoded embed_text"
 
 
 def test_token_count_semantics_unchanged_and_cap_respected() -> None:

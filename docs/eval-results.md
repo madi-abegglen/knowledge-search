@@ -345,7 +345,7 @@ No question got worse. The guard did not fire in the full run (the model wrote e
 
 ### Known limitations of the guard
 
-- Matching depends on chunk text as stored: repaired strings are **lowercase and whitespace-free**, which is right for emails but could lowercase a case-sensitive URL path. The root-cause fix is at ingest (store the original text span, not decoded tokens), which needs a re-ingest and re-baseline; listed as a remaining weakness.
+- ~~Matching depends on chunk text as stored: repaired strings are lowercase and whitespace-free.~~ **Obsolete on the real index since 7b2**: chunks now hold the original text, so the repair target is the chunk's own string in its own casing (tested). The whitespace-tolerant matching is kept as a defensive fallback and still describes behavior against any index built before 7b2 (for example the backup).
 - A capitalized label after a stray ". " (`Northwind. Example`) is read as a new sentence and fails closed (blocked).
 - Prose such as "meet @ noon. See" can look email-like once spaces are tolerated and would be blocked.
 - An email the user typed in the question and the answer echoes is blocked (only chunks count).
@@ -397,4 +397,29 @@ Built with `CHROMA_PATH` pointing at a scratch directory; compared with `scripts
 - Unit tests: `scripts/test_chunk_offsets.py` (7: heading kept, overlap present, no empty chunk, substring of source, casing/punctuation preserved, non-ASCII, **embed_text/sections/ids identical to the current real index**, token-cap semantics unchanged; max re-encoded tokens of the original text 189 vs cap 256). Guard tests 27 passed (23 earlier + 4 original-case cases, including the repair target being the chunk's own string and casing).
 - Leak scan and citation checks do not read chunk text: citations are checked against `{chunk["source"]}` (`app/answer.py`), and the leak scan compares model output with labels built from `access.json` and document titles (`_restricted_labels`). The only consumers of `chunk["text"]` are the prompt context block and the exact-string guard.
 - Scratch-index runs: Q1-Q25 25/25; edge cases 30 PASS + 2 documented findings (Spanish, Japanese); `verify_phase5_ui` exit 0; audit exit 0.
-- **Real-index swap: PENDING** (approved, not yet performed at the time of this commit). Replacing the real index. Procedure: back up `chroma_db/`, re-run `python -m ingest.index` with the real path (upsert by the same ids), re-run `compare_indexes.py` against the backup, re-run the evals.
+- **Real-index swap: DONE** (see "Real index swap" below). Procedure used: back up `chroma_db/` to `chroma_db_backup_pre7b2/`, re-run `python -m ingest.index` on the real path (upsert by the same ids), `compare_indexes.py` against the backup, re-run the evals.
+
+### Real index swap (7b2, done)
+
+`chroma_db/` was backed up to `chroma_db_backup_pre7b2/` (65 chunks, same bytes; the name is git-ignored via `chroma_db_backup*/`), then `python -m ingest.index` was run on the real path (upsert, same ids). Checked with `scripts/compare_indexes.py chroma_db_backup_pre7b2 chroma_db`:
+
+| Check | Result |
+|---|---|
+| Chunk count / ids | 65 = 65, identical |
+| Metadata incl. every `grp_*` flag | identical (0 differing chunks) |
+| Embeddings | max abs diff 0.0 |
+| Stored text | changed 65/65 (decoded -> original); all non-empty; all true substrings of their source |
+| Retrieval Q1-Q25: top-8 ids, order, distances | 25/25 identical |
+
+On the swapped real index (temporary `LOG_DIR`, so the real `logs/` were not touched):
+
+| Run | Result |
+|---|---|
+| Q1-Q25 v1 (`after_7b2_real_v1.json`) | **25/25**, 0 leaks, 8/8 conflicts, 0 false conflict notes, guard repaired=0 blocked=0; input tokens 26,038 (same as the scratch run) |
+| Q5 x20, guard OFF (`q5_realindex_guard_off.json`) | **20/20** (old index, guard off: 18/20) |
+| `verify_phase5_ui.py` | exit 0 |
+| `edge_cases.py` | 30 PASS, 0 FAIL, 2 documented FINDING (Spanish, Japanese); real index 65 chunks, `data/` fingerprint `82be1429dbfe5dd4` unchanged |
+| Test suites | select_final 8, phase6e_fixes 13, monitoring 26, exact_string_guard 27, chunk_offsets 7: all passed |
+| Audit | exit 0 |
+
+Rollback if ever needed: stop the app, replace `chroma_db/` with `chroma_db_backup_pre7b2/`. The backup is local and git-ignored; delete it once you are satisfied.
