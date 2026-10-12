@@ -379,7 +379,8 @@ def main() -> int:
             parser.error("--name must differ from --rescore so the original results are kept")
         stored_meta = json.loads((RESULTS_DIR / f"{args.rescore}.json").read_text(encoding="utf-8"))
         stored = {r["id"]: r for r in stored_meta["results"]}
-        results = [rescore_one(row, stored[int(row["id"])], documents) for row in rows]
+        results = [rescore_one(row, stored[int(row["id"])], documents)
+                   for row in rows if int(row["id"]) in stored]
     else:
         results = [run_one(row, documents) for row in rows]
     summary = summarize(results)

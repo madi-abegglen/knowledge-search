@@ -1,0 +1,213 @@
+{
+  "run_name": "heldout_prefix",
+  "timestamp": "2026-10-12T04:06:22.575333+00:00",
+  "rescored_from": null,
+  "model": "claude-sonnet-5-5",
+  "prompt": {
+    "file": "answer_v1.md",
+    "version": "1"
+  },
+  "embed_model": "all-MiniLM-L6-v2",
+  "price_per_mtok": {
+    "input": 2.0,
+    "output": 10.0
+  },
+  "summary": {
+    "questions": 4,
+    "passed": 2,
+    "retrieval_hit": [
+      4,
+      4
+    ],
+    "outcome_accuracy": [
+      4,
+      4
+    ],
+    "correct_refusals": [
+      0,
+      0
+    ],
+    "false_refusals": [
+      0,
+      4
+    ],
+    "citation_correct": [
+      4,
+      4
+    ],
+    "must_contain": [
+      4,
+      4
+    ],
+    "conflict_flag": [
+      2,
+      4
+    ],
+    "false_conflict_notes": 0,
+    "false_conflict_ids": [],
+    "leaks": 0,
+    "latency_avg_ms": 1842.0,
+    "latency_p95_ms": 2025.5,
+    "input_tokens": 3999,
+    "output_tokens": 647,
+    "cost_total_usd": 0.014468
+  },
+  "results": [
+    {
+      "id": 21,
+      "user": "employee",
+      "question": "How many PTO days per year do employees with 6 or more years of service get?",
+      "expected_outcome": "answer",
+      "expected_source": [
+        "hr_pto_policy_2025.md"
+      ],
+      "actual_outcome": "answer",
+      "answer": "Employees with 6 or more years of service get 30 PTO days per year under the current PTO policy (version 2025.1). PTO accrues per pay period and is available as it is earned.",
+      "citations": [
+        {
+          "source": "hr_pto_policy_2025.md",
+          "section": "3. Annual PTO allotment"
+        }
+      ],
+      "conflict_note": "The superseded 2023 PTO policy (version 2023.2) listed 25 days per year for 6+ years of service. That value is no longer current.",
+      "clarifying_question": null,
+      "latency_ms": 2025.5,
+      "input_tokens": 1021,
+      "output_tokens": 178,
+      "retrieved_sources": [
+        "hr_pto_policy_2025.md",
+        "hr_holiday_calendar_2026.md",
+        "hr_sabbatical_program.md",
+        "hr_parental_leave_us.md",
+        "hr_pto_policy_2023.md"
+      ],
+      "passed": true,
+      "reasons": [],
+      "retrieval_hit": true,
+      "must_contain_ok": true,
+      "citation_ok": true,
+      "conflict_ok": true,
+      "false_conflict_note": false,
+      "leaks": []
+    },
+    {
+      "id": 22,
+      "user": "employee",
+      "question": "How far in advance do I need to request PTO for a 3-day absence?",
+      "expected_outcome": "answer",
+      "expected_source": [
+        "hr_pto_policy_2025.md"
+      ],
+      "actual_outcome": "answer",
+      "answer": "For an absence of 3 days or more, you should submit your PTO request in the HR portal at least 2 weeks in advance. Your manager responds within 3 business days.",
+      "citations": [
+        {
+          "source": "hr_pto_policy_2025.md",
+          "section": "4. Requesting PTO"
+        }
+      ],
+      "conflict_note": null,
+      "clarifying_question": null,
+      "latency_ms": 1579.0,
+      "input_tokens": 1017,
+      "output_tokens": 126,
+      "retrieved_sources": [
+        "hr_pto_policy_2025.md",
+        "hr_holiday_calendar_2026.md",
+        "hr_sabbatical_program.md",
+        "hr_pto_policy_2025.md",
+        "hr_pto_policy_2025.md"
+      ],
+      "passed": false,
+      "reasons": [
+        "expected conflict_note, got none"
+      ],
+      "retrieval_hit": true,
+      "must_contain_ok": true,
+      "citation_ok": true,
+      "conflict_ok": false,
+      "false_conflict_note": false,
+      "leaks": []
+    },
+    {
+      "id": 23,
+      "user": "employee",
+      "question": "Where do I submit a PTO request?",
+      "expected_outcome": "answer",
+      "expected_source": [
+        "hr_pto_policy_2025.md"
+      ],
+      "actual_outcome": "answer",
+      "answer": "Submit PTO requests in the HR portal. For absences of 3 days or more, submit at least 2 weeks ahead; your manager responds within 3 business days.",
+      "citations": [
+        {
+          "source": "hr_pto_policy_2025.md",
+          "section": "4. Requesting PTO"
+        }
+      ],
+      "conflict_note": "The superseded 2023 PTO policy (version 2023.2) said to submit requests by email to your manager at least 1 week ahead. That is no longer current; the 2025 policy directs requests to the HR portal.",
+      "clarifying_question": null,
+      "latency_ms": 1831.7,
+      "input_tokens": 921,
+      "output_tokens": 193,
+      "retrieved_sources": [
+        "hr_pto_policy_2025.md",
+        "hr_pto_policy_2025.md",
+        "hr_pto_policy_2025.md",
+        "hr_sabbatical_program.md",
+        "hr_pto_policy_2023.md"
+      ],
+      "passed": true,
+      "reasons": [],
+      "retrieval_hit": true,
+      "must_contain_ok": true,
+      "citation_ok": true,
+      "conflict_ok": true,
+      "false_conflict_note": false,
+      "leaks": []
+    },
+    {
+      "id": 24,
+      "user": "employee",
+      "question": "When does a new full-time employee become eligible to use PTO?",
+      "expected_outcome": "answer",
+      "expected_source": [
+        "hr_pto_policy_2025.md"
+      ],
+      "actual_outcome": "answer",
+      "answer": "A new full-time employee is eligible to use PTO from their first day of employment. PTO accrues per pay period and is available as it is earned.",
+      "citations": [
+        {
+          "source": "hr_pto_policy_2025.md",
+          "section": "2. Eligibility"
+        },
+        {
+          "source": "hr_pto_policy_2025.md",
+          "section": "3. Annual PTO allotment"
+        }
+      ],
+      "conflict_note": null,
+      "clarifying_question": null,
+      "latency_ms": 1931.8,
+      "input_tokens": 1040,
+      "output_tokens": 150,
+      "retrieved_sources": [
+        "hr_pto_policy_2025.md",
+        "hr_pto_policy_2025.md",
+        "hr_pto_policy_2025.md",
+        "hr_pto_policy_2025.md",
+        "hr_pto_policy_2023.md"
+      ],
+      "passed": false,
+      "reasons": [
+        "expected conflict_note, got none"
+      ],
+      "retrieval_hit": true,
+      "must_contain_ok": true,
+      "citation_ok": true,
+      "conflict_ok": false,
+      "false_conflict_note": false,
+      "leaks": []
+    }
+  ]
+}
