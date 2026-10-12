@@ -21,7 +21,8 @@ from sentence_transformers import SentenceTransformer  # noqa: E402
 from ingest.chunk import MAX_TOKENS, chunk_document  # noqa: E402
 from ingest.load import SourceDocument, load_documents  # noqa: E402
 
-REAL_CHROMA = ROOT / "chroma_db"
+_configured = Path(os.environ.get("CHROMA_PATH", "./chroma_db"))
+REAL_CHROMA = _configured if _configured.is_absolute() else ROOT / _configured   # honors CHROMA_PATH
 TOKENIZER = SentenceTransformer(os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2"),
                                 trust_remote_code=False).tokenizer
 

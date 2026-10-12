@@ -13,11 +13,11 @@ Full build plan: `docs/build-plan.md`. Problem statement and success metrics: `d
 - [x] Phase 4: permission-aware retrieval + 3-outcome answers 
 - [x] Phase 5: Streamlit UI
 - [x] Phase 6: evals and edge-case testing
-- [ ] Phase 7: monitoring, runbook, README **<- in progress**
+- [x] Phase 7: monitoring, runbook, README
   - [x] 7a monitoring (query log, `infra/report.py`, alert thresholds)
   - [x] 7b exact-string guard + original chunk text (7b2, real index swapped) done; remaining weaknesses listed in docs/build-plan.md 7b **<- next: pick one, or 7c**
   - [x] 7b3 cleanups done: A (config error state), B (prompt front matter), C (runtime / dev lockfile split, no version changes; deferred upgrades in docs/lockfiles.md)
-  - [ ] 7c `docs/runbook.md` and README
+  - [x] 7c `docs/runbook.md` and README (screenshots pending: none exist yet)
 
 ## Architecture decisions (already made)
 - **Level 3 "basic RAG"**, designed so Level 4 (hybrid BM25 + reranker) is an easy upgrade later.

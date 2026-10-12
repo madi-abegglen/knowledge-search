@@ -86,6 +86,7 @@ python -m pip install -U pip
 python -m pip install --only-binary=:all: -r requirements.in
 python -m pip freeze > requirements.txt
 ```
+(First-time setup only, before any audit tooling is installed. Once `requirements-dev.txt` exists, never freeze the working venv into `requirements.txt`: it would merge the audit tooling back in. Regenerate the runtime lock from `requirements.in` in a clean venv, as described in `docs/lockfiles.md`.)
 **Windows PowerShell 5.1:** `>` writes UTF-16, which pip can't read. Use this for the last command instead:
 ```powershell
 python -m pip freeze | Out-File -Encoding utf8 requirements.txt
@@ -136,19 +137,13 @@ logs/
 __pycache__/
 *.pyc
 .DS_Store
+chroma_db_backup*/
 ```
 **Check:** `git check-ignore -v .env .venv chroma_db logs` lists every path.
 
 ### 6. Env files
-`.env.example` (committed):
-```
-ANTHROPIC_API_KEY=your-key-here
-MODEL_NAME=claude-sonnet-5-5
-CHROMA_PATH=./chroma_db
-EMBED_MODEL=all-MiniLM-L6-v2
-LOG_DIR=./logs
-```
-Then `cp .env.example .env`. **The user** edits `.env` and pastes their real key.
+`.env.example` (committed) lists every setting with placeholders only; see it for the current list (`ANTHROPIC_API_KEY`, `MODEL_NAME`, `CHROMA_PATH`, `EMBED_MODEL`, `LOG_DIR`, `PRICE_INPUT_PER_MTOK`, `PRICE_OUTPUT_PER_MTOK`, `DAILY_COST_LIMIT_USD`, `QUERY_LOG_SALT`) and `docs/runbook.md` section 2 for what each does.
+Then `cp .env.example .env` (PowerShell: `Copy-Item .env.example .env`; edit it in an editor, because `Set-Content -Encoding utf8` in Windows PowerShell 5.1 adds a BOM that makes `check_env.py` misreport the key). **The user** edits `.env` and pastes their real key.
 **Check:** `.env` exists and differs from `.env.example` in the key line only. Do not print its contents.
 
 ### 7. Verify the toolchain
@@ -187,7 +182,7 @@ git commit -m "Initial scaffold: problem statement, sample docs, access.json, en
 ### 9. Environment separation (note for the README)
 - Local dev uses `.env` and the local `chroma_db/`.
 - A production setup would use separate API keys per environment, a managed secret store (not a file), and read-only service accounts for the document sources.
-- Record this in `docs/environments.md` (dev vs. prod: keys, data access, who can change what).
+- Record this in the README or a short `docs/environments.md` (dev vs. prod: keys, data access, who can change what); the README currently states the demo-only scope. (`docs/environments.md` does not exist yet.)
 
 ### 10. Optional: remote
 Create an empty **private** repo, then:

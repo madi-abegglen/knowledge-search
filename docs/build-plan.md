@@ -91,17 +91,20 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 - [ ] Non-English questions are refused (English-only embedding model; Spanish/Japanese distances 0.74-0.85 vs 0.195). Needs a multilingual model and a re-baseline.
 - [ ] Guard gaps: `clarifying_question` is not scanned; capitalized label after a stray ". " fails closed.
 - [x] Missing `MODEL_NAME` / `ANTHROPIC_API_KEY` looked like "not found". Fixed in 7b3-A: distinct `ConfigError` runtime error state.
+- [ ] Leak scan flags refusals that echo a restricted title (1 of 25 eval questions); can fire the CRITICAL alert in normal use. Fix: do not scan or count refusal text. Needs a full eval cycle (docs/eval-results.md, 7c findings).
+- [ ] Unexpected UI exceptions are swallowed and not logged.
+- [ ] `check_env.py` misreports an API key in a BOM-prefixed `.env`; `PROMPT_VERSION` is missing from `.env.example`.
 
 ### 7b3. Small cleanups
 - [x] A. Missing/blank `MODEL_NAME` or `ANTHROPIC_API_KEY`: distinct config error state (startup and query time), no model call, nothing sensitive shown or logged.
 - [x] B. Prompt front matter `model` placeholder replaced; rendered system prompt byte-identical (v1 and v2).
 - [x] C. Lockfile split into runtime (`requirements.txt`, 118) and audit tooling (`requirements-dev.txt`, 16) with **no version changes**; `check_env.py --audit` audits both files with the same accepted exceptions and still bites (`scripts/test_audit_bites.py`). The 15 drifted packages are listed as available upgrades, deferred to a separate cycle with a full eval run (`docs/lockfiles.md`).
 
-### 7c. Runbook and README
-- [ ] `docs/runbook.md`: symptom, likely cause, fix. Include: stale answers (re-ingest), wrong docs (tune chunking/top-k), **leak (disable app, audit metadata and filters)**, JSON failures (check prompt version).
-- [ ] `README.md`: architecture diagram, setup steps, results table, known limitations, upgrade path (hybrid retrieval, reranker, live ACL sync, Slack interface).
+### 7c. Runbook and README (done)
+- [x] `docs/runbook.md`: start/stop, settings, health check and alert response, error states, add/change a document or permission, rollback, dependency cycle, log hygiene, key rotation, limitations. Every command was run or is marked not run.
+- [x] `README.md`: scope, architecture diagram, permission model, quickstart (fresh-clone tested), results sourced from `docs/eval-results.md`, findings, limitations, how it was built. Screenshots are pending (none exist).
 
-**Done when:** a stranger could run it from the README.
+**Done when:** a stranger could run it from the README. **Status: done** (fresh-clone test, `scripts/check_docs.py`).
 
 ## Stretch
 Google Drive source via API; nightly re-index; "last updated" warnings on stale sources; hybrid BM25 + reranker.

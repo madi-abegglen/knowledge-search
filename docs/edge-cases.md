@@ -73,3 +73,4 @@ Proposed fix (not done; needs a model/dependency decision and re-baseline): swit
 - No query log exists yet (Phase 7); only `feedback.jsonl` was checked for source names and counts.
 - Missing `MODEL_NAME` still returns the standard refusal (configuration error looks like "not found"); not in scope of these fixes.
 - Q5 (exact security address) varies between runs under prompt v1: 9/10 before and 9/10 after these changes (`evals/results/after_6e_v1_q5_repeats.json`). The model sometimes writes `security @ northwind. example`.
+- The leak scan also runs on refusal text and can flag a refusal that repeats a restricted title the user asked about (1 of 25 eval questions, Q10); the user still sees only the fixed refusal. See the "Runbook and README findings (7c)" section of `docs/eval-results.md`.

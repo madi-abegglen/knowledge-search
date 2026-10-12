@@ -426,7 +426,7 @@ Rollback if ever needed: stop the app, replace `chroma_db/` with `chroma_db_back
 
 ## Small cleanups (7b3)
 
-No retrieval, chunking, schema or prompt-text change. A and B are done; C is a proposal pending approval.
+No retrieval, chunking, schema or prompt-text change. A, B and C are all done.
 
 | Item | Result |
 |---|---|
@@ -435,3 +435,23 @@ No retrieval, chunking, schema or prompt-text change. A and B are done; C is a p
 | C. Lockfile | Done as a **no-drift split**: 16 audit-tooling lines moved unchanged from `requirements.txt` to `requirements-dev.txt` (0 version changes; `git diff` of `requirements.txt` is 16 deletions, 0 additions). Audit covers both files and still fails on a vulnerable pin. The 15 packages that a fresh resolve would upgrade are deferred; see `docs/lockfiles.md`. |
 
 Regression on the working venv and real index (temporary `LOG_DIR`): suites 8 + 13 + 26 + 27 + 7 + 9 passed; Q1-Q25 v1 **25/25**, 0 leaks, 8/8 conflicts, 0 false notes, guard repaired=0 blocked=0 (`after_7b3_v1.json`); `verify_phase5_ui` exit 0; edge cases 30 PASS + 2 documented findings; real index 65 chunks; `data/` fingerprint `82be1429dbfe5dd4`; audit exit 0.
+
+## Runbook and README findings (7c)
+
+Writing the runbook and README meant running every documented command. Findings, none fixed in the docs-only 7c cycle:
+
+| # | Finding | Evidence | Proposed fix (needs its own cycle with a full eval run) |
+|---|---|---|---|
+| 1 | **The leak scan flags refusals that echo a restricted title.** `leak_scan_blocked` is set although the user sees only the fixed refusal, so the CRITICAL monitoring alert can fire during normal use. | `scripts/diagnose_leak_scan.py --all-eval`: scan would block **1 of 25** questions (Q10 "What's the exec bonus structure?"; the model's refusal said "...an executive bonus structure", matching the restricted title "Executive Bonus Structure"). The logged outcome is `refuse` for both this false positive and a real block, so the log alone cannot tell them apart. | Do not scan or count refusal text (it is replaced by the fixed refusal anyway); record the flag only when a non-refusal answer is blocked. |
+| 2 | Unexpected exceptions in the UI are swallowed and not logged. | `app/ui.py` catches `Exception` around `answer_question` and rendering, shows "Something went wrong. Try again." and writes nothing. | Log the exception class name with outcome `error`. |
+| 3 | `check_env.py` reports "API key looks unset" for a `.env` with a UTF-8 BOM (created by `Set-Content -Encoding utf8` in Windows PowerShell 5.1) although the app works. | Fresh-clone test: BOM `ef bb bf` at the start of `.env`, `[WARN]` from `check_env.py`, successful CLI queries. | Read `.env` with `utf-8-sig`. |
+| 4 | `PROMPT_VERSION` is read by the app but is not listed in `.env.example`. | `app/answer.py: prompt_path()`; `.env.example` has no such key. | Add a commented `PROMPT_VERSION=1` line. |
+| 5 | `scripts/test_chunk_offsets.py` had the index path hard-coded and failed in a clone that ingested to another `CHROMA_PATH`. | Fresh-clone test: `Collection [knowledge_chunks] does not exist`. | Fixed in 7c: the test now honors `CHROMA_PATH`. |
+| 6 | `docs/adlc.md` refers to runtime gates `KS-G1` to `KS-G10` that are not defined anywhere else in the repo. | `grep` finds them only in `docs/adlc.md`. | Define them or drop the sentence; the README does not cite them. |
+| 7 | `docs/environment-setup.md` was stale after the lockfile split (old `.env.example` listing, a freeze command that would re-merge audit tooling, a missing ignore pattern, a reference to a non-existent `docs/environments.md`). | Read during 7c. | Corrected in 7c (see that file). |
+| 8 | **The conflict note is the model's choice.** A manually captured UI run (`hr_user`, "How many PTO days do new hires get?", `docs/screenshots/`) answered 20 days with no conflict note although the 2023 section was in context. | `app.retrieve` for `employee`, `hr_user` and `exec_user` returns the same 5 chunks, including `hr_pto_policy_2023.md` sections 3 and 4. Every recorded eval run flagged Q1, so this is one observed omission, not a rate. | Keep describing the note as "usually"; if it matters, make the note deterministic (compare retrieved current vs superseded values in code) rather than prompt-dependent. |
+
+Fresh-clone verification (clone of `b2e27ef` at a short path, venv from `requirements.txt`, ingest to a scratch
+`CHROMA_PATH`): ingest 65 chunks, `verify_ingest.py` "Verified 15 sources and 65 chunks", CLI queries answered
+(PTO: answer with conflict note; exec bonus as employee: refusal), `test_select_final` 8 and `test_monitoring` 26
+passed, app answered the health check on localhost. The clone and its venv were then deleted.
