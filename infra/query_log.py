@@ -73,6 +73,10 @@ def _safe_error_type(value: Any) -> str | None:
     return text if _TYPE_NAME.fullmatch(text) else "UnknownError"
 
 
+def _safe_guard_action(value: Any) -> str:
+    return value if value in ("none", "repaired", "blocked") else "none"
+
+
 def build_entry(
     user: str,
     question: str,
@@ -102,6 +106,8 @@ def build_entry(
         "error_type": _safe_error_type(result.get("error_type")),
         "retrieved_count": int(result.get("retrieved_count", 0) or 0),
         "leak_scan_blocked": bool(result.get("leak_scan_blocked", False)),
+        # exact-string guard: none | repaired | blocked (never the string itself)
+        "guard_action": _safe_guard_action(result.get("guard_action")),
         "prompt_version": prompt_ver if prompt_ver is not None else prompt_version(),
         "model": model if model is not None else os.environ.get("MODEL_NAME", "unset"),
         "question_len": length,

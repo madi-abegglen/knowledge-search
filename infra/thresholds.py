@@ -22,6 +22,9 @@ class AlertThresholds:
     min_queries_for_rate_alerts: int = 20     # avoid alerting on tiny samples
     consecutive_errors_max: int = 3           # alert at this many errors in a row
     daily_cost_limit_usd: float | None = None  # from DAILY_COST_LIMIT_USD in .env
+    # exact-string guard "blocked" count: WARNING (never CRITICAL) when above this AND above the
+    # previous window of the same length (a rising count means the model is inventing emails/URLs)
+    guard_blocked_warn_above: int = 0
 
 
 def load_thresholds() -> AlertThresholds:

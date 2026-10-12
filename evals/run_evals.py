@@ -222,6 +222,7 @@ def build_record(
         "input_tokens": result["input_tokens"],
         "output_tokens": result["output_tokens"],
         "retrieved_sources": retrieved,
+        "guard_action": result.get("guard_action", "none"),
         **checks,
     }
 
@@ -269,6 +270,8 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "false_conflict_notes": sum(bool(r.get("false_conflict_note")) for r in results),
         "false_conflict_ids": [r["id"] for r in results if r.get("false_conflict_note")],
         "leaks": sum(1 for r in results if r["leaks"]),
+        "guard_repaired": sum(1 for r in results if r.get("guard_action") == "repaired"),
+        "guard_blocked": sum(1 for r in results if r.get("guard_action") == "blocked"),
         "latency_avg_ms": round(sum(latencies) / len(latencies), 1) if latencies else 0.0,
         "latency_p95_ms": round(percentile_95(latencies), 1) if latencies else 0.0,
         "input_tokens": sum(r["input_tokens"] for r in results),
@@ -293,6 +296,7 @@ def print_report(results: list[dict[str, Any]], summary: dict[str, Any], cost: f
     print(f"conflict flagged:      {rate(*summary['conflict_flag'])} (where expects_conflict=yes)")
     print(f"false conflict notes:  {summary['false_conflict_notes']} {summary['false_conflict_ids']} (informational)")
     print(f"PERMISSION LEAKS:      {summary['leaks']}")
+    print(f"exact-string guard:    repaired={summary['guard_repaired']}, blocked={summary['guard_blocked']}")
     print(f"latency avg / p95:     {summary['latency_avg_ms']:.0f} ms / {summary['latency_p95_ms']:.0f} ms")
     print(f"tokens in / out:       {summary['input_tokens']} / {summary['output_tokens']}")
     if cost is None:
@@ -308,16 +312,19 @@ def run_repeats(args: argparse.Namespace, rows: list[dict[str, str]],
     for row in rows:
         per_question[int(row["id"])] = [run_one(row, documents) for _ in range(args.repeat)]
 
-    print(f"{'id':>2} {'passes':>8} {'conflict_note':>13} {'must_contain':>12}  failure reasons")
+    print(f"{'id':>2} {'passes':>8} {'conflict_note':>13} {'must_contain':>12} {'repaired':>9} {'blocked':>8}"
+          "  failure reasons")
     leaks = 0
     for qid, runs in per_question.items():
         passes = sum(r["passed"] for r in runs)
         notes = sum(bool((r.get("conflict_note") or "").strip()) for r in runs)
         contain = sum(bool(r["must_contain_ok"]) for r in runs)
+        repaired = sum(r.get("guard_action") == "repaired" for r in runs)
+        blocked = sum(r.get("guard_action") == "blocked" for r in runs)
         leaks += sum(1 for r in runs if r["leaks"])
         reasons = sorted({reason for r in runs for reason in r["reasons"]})
         print(f"{qid:>2} {passes:>3}/{args.repeat:<4} {notes:>8}/{args.repeat:<4} "
-              f"{contain:>7}/{args.repeat:<4}  {' | '.join(reasons)}")
+              f"{contain:>7}/{args.repeat:<4} {repaired:>9} {blocked:>8}  {' | '.join(reasons)}")
     print(f"PERMISSION LEAKS: {leaks}")
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

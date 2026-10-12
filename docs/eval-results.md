@@ -299,3 +299,54 @@ Input tokens on the original 20 questions: 21,119 (gate, v1) vs 21,015 (pairing,
 ## Phase 6e regression run (after the edge-case fixes)
 
 **Q1-Q25 under prompt v1 = 24/25** (`evals/results/after_6e_v1.json`). **The one miss is Q5**: the model wrote the security address with spaces (`security @ northwind. example`), so the exact-address check failed. This is the known run-to-run variance of about 1 in 10 under v1 and is **unchanged by the 6e fixes**: the retrieved sets are identical to `after_pairing_v1.json`, and a fresh Q5 x10 gave **9/10** (`after_6e_v1_q5_repeats.json`), the same rate as before. Everything else is unchanged: 8/8 conflicts flagged, 0 false conflict notes, citations 18/18, **0 permission leaks**. Nothing was tuned to make Q5 pass.
+
+## Exact-string guard (7b)
+
+**Change (one variable):** `app/guard.py`, called from `app/answer.py` after JSON validation and before the citation and leak checks. No retrieval, prompt or schema change. Emails and URLs in `answer` / `conflict_note` are compared only against the permitted chunks passed to the model: a spaced or altered one that matches exactly one chunk string (whitespace removed, case-insensitive) is **repaired**; one that matches nothing, or two different strings, is **blocked** (existing retry-once path, then the unchanged refusal text); otherwise untouched. The result carries `guard_action` in {none, repaired, blocked}, which is the only thing logged (never the string).
+
+**Why a code guard and not a prompt:** a prompt rule (v2's exact-copy sentence) lowers the failure rate but cannot guarantee it; an exact string is something code can verify. The guard also catches a different failure a prompt cannot: an address the model invents that is not in the permitted context.
+
+### Q5 as the model-failure example, and the root cause found
+
+Q5 sometimes answered `security @ northwind. example`. Diagnosing the guard's first run showed this is **not only model variance**: the chunk text in the index is the embedding tokenizer's decoded text (lowercased, spaced punctuation), so the context the model sees already contains `... or email security @ northwind. example. 2. * * do not * * click links ...`. The model usually cleans the address up and sometimes copies the spacing faithfully. The real source is `security@northwind.example` in `data/it_security_incident_reporting.md`.
+
+| Q5, exact address `security@northwind.example` intact | Result |
+|---|---|
+| v1, no guard (`v1_repeats.json`, n=10) | 9/10 |
+| v1, no guard (`after_6e_v1_q5_repeats.json`, n=10) | 9/10 |
+| v2 prompt, no guard (`v2_repeats.json`, n=10) | 10/10 |
+| v1 + guard, **first implementation** (`guard_q5_repeats_v1.json`, n=20) | **0/20: all blocked and refused** (defect, below) |
+| v1 + guard, fixed (`guard_q5_repeats_v1b.json`, n=20) | **20/20** (1 repaired, 0 blocked) |
+
+### What the evidence supports
+
+- **The Q5 before/after is small-n.** Without the guard: 9/10 and 9/10 (two runs of 10, v1). With the fixed guard: 20/20 (one run), of which exactly **one answer was live-repaired** and none blocked. The difference between 18/20 and 20/20 is within what chance alone can produce at this sample size, so it is not statistically strong evidence.
+- **The stronger evidence is the 23 unit tests plus the one live repair.** The tests pin each behavior deterministically: spaced email and URL repaired, exact string untouched, unknown or ambiguous string blocked then refused, a string present only in a non-permitted chunk blocked, no emails/URLs untouched, and the guard never raising. The single live repair shows the repair path firing on a real model answer against real tokenizer-decoded chunks.
+
+### Root cause: the model sees the tokenizer's decoded text
+
+The indexed chunk text is the embedding tokenizer's decoded form (lowercased, spaced punctuation), and that decoded text is exactly what is passed to the model as context. So an address can reach the model already as `security @ northwind. example`. The guard compensates at answer time; the proper fix is to store the **original text span per chunk** (and embed from it), which needs a re-ingest and a full re-baseline of the evals. It is the next item on the Phase 7 weakness list.
+
+**The first implementation was wrong and made things worse.** It built its known strings by extracting unspaced emails/URLs from the chunks, but the chunks hold the decoded, spaced form, so its known set was empty and it blocked even the correctly written address (`after_7b_v1.json`: 24/25, Q5 refused; `guard_q5_repeats_v1.json` kept as evidence). The fix reads the rule as "whitespace removed on both sides": candidates are matched against the whitespace-stripped chunk text, with edge checks so a match cannot be the middle of a longer string, and the repair target is the chunk's string with its stray whitespace removed. Two further defects were found and fixed with unit tests: a following sentence word being absorbed (`example. Do`), and partial matches (`security@northwind`).
+
+### Full set (Q1-Q25, prompt v1)
+
+| Metric | 7a baseline (`after_7a_v1`) | 7b, guard fixed (`after_7b_v1b`) |
+|---|---|---|
+| Questions passed | 25/25 | 25/25 |
+| Retrieval / outcome / citations | 18/18, 25/25, 18/18 | 18/18, 25/25, 18/18 |
+| Conflicts flagged / false notes | 8/8 / 0 | 8/8 / 0 |
+| **Permission leaks** | **0** | **0** |
+| Guard actions fired | n/a | repaired=0, blocked=0 |
+| Latency avg / p95 (ms) | 1874 / 3429 | 1978 / 3366 (noise) |
+| Cost | $0.0991 | $0.1000 |
+
+No question got worse. The guard did not fire in the full run (the model wrote exact addresses); it fired once in the Q5 x20 run (1 repaired). Tests: `scripts/test_exact_string_guard.py` (23 cases).
+
+### Known limitations of the guard
+
+- Matching depends on chunk text as stored: repaired strings are **lowercase and whitespace-free**, which is right for emails but could lowercase a case-sensitive URL path. The root-cause fix is at ingest (store the original text span, not decoded tokens), which needs a re-ingest and re-baseline; listed as a remaining weakness.
+- A capitalized label after a stray ". " (`Northwind. Example`) is read as a new sentence and fails closed (blocked).
+- Prose such as "meet @ noon. See" can look email-like once spaces are tolerated and would be blocked.
+- An email the user typed in the question and the answer echoes is blocked (only chunks count).
+- `clarifying_question` is not scanned. The guard fails open (action none) if it crashes; the leak scan still runs.

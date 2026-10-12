@@ -15,7 +15,7 @@ Full build plan: `docs/build-plan.md`. Problem statement and success metrics: `d
 - [x] Phase 6: evals and edge-case testing
 - [ ] Phase 7: monitoring, runbook, README **<- in progress**
   - [x] 7a monitoring (query log, `infra/report.py`, alert thresholds)
-  - [ ] 7b fix known weaknesses (one per cycle) **<- next**
+  - [x] 7b exact-string guard done; remaining weaknesses listed in docs/build-plan.md 7b; **next: store original chunk text span (ingest root cause)**
   - [ ] 7c `docs/runbook.md` and README
 
 ## Architecture decisions (already made)

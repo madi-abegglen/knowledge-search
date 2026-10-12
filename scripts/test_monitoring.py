@@ -195,8 +195,9 @@ def test_log_line_never_contains_forbidden_content() -> None:
     assert entry_["error_type"] == "UnknownError"
     assert entry_["question_len"] == len(question) and len(entry_["question_sha"]) == QL.HASH_PREFIX_LEN
     assert set(entry_) == {"id", "timestamp", "user", "outcome", "latency_ms", "input_tokens", "output_tokens",
-                           "cost_usd", "error_type", "retrieved_count", "leak_scan_blocked",
+                           "cost_usd", "error_type", "retrieved_count", "leak_scan_blocked", "guard_action",
                            "prompt_version", "model", "question_len", "question_sha"}
+    assert entry_["guard_action"] == "none"
 
 
 def test_cost_from_env_prices_and_none_when_unset() -> None:
@@ -330,6 +331,51 @@ def test_invalid_input_is_its_own_count_and_not_in_refusal_rate() -> None:
         loaded, _ = load_entries(Path(tmp) / QL.QUERY_LOG_NAME, NOW - timedelta(days=7))
     summary = summarize(loaded, [], 0)
     assert summary["invalid_input"] == 10 and summary["refusal_rate"] == 0.25
+
+
+def _with_guard(e: dict[str, Any], action: str) -> dict[str, Any]:
+    return dict(e, guard_action=action)
+
+
+def test_guard_counts_are_shown_and_old_lines_count_as_none() -> None:
+    entries = healthy_set(25)                                      # no guard_action key at all (old lines)
+    entries[0] = _with_guard(entries[0], "repaired")
+    entries[1] = _with_guard(entries[1], "repaired")
+    text, code = report(entries)
+    assert "exact-string guard: repaired=2, blocked=0" in text, text
+    assert code == 0 and "GUARD_BLOCKED" not in text
+
+
+def test_rising_guard_blocked_is_a_warning_not_critical() -> None:
+    day = 60 * 24
+    prior = [_with_guard(entry(minutes_ago=8 * day + i), "blocked") for i in range(1)]     # 1 in previous window
+    now_window = healthy_set(25)
+    for i in range(3):                                                                   # 3 in this window
+        now_window[i] = _with_guard(now_window[i], "blocked")
+    text, code = report(now_window + prior)
+    assert code == 1 and "[WARNING] GUARD_BLOCKED_RISING" in text, text
+    assert "CRITICAL" not in text and "blocked=3 (previous window blocked=1)" in text, text
+
+
+def test_stable_or_zero_guard_blocked_does_not_alert() -> None:
+    day = 60 * 24
+    prior = [_with_guard(entry(minutes_ago=8 * day + i), "blocked") for i in range(2)]
+    window = healthy_set(25)
+    for i in range(2):                                                                   # 2 now, 2 before
+        window[i] = _with_guard(window[i], "blocked")
+    text, code = report(window + prior)
+    assert code == 0 and "GUARD_BLOCKED" not in text, text
+    text, code = report(healthy_set(25) + prior)                                         # 0 now
+    assert code == 0 and "GUARD_BLOCKED" not in text
+
+
+def test_guard_action_in_log_is_whitelisted_to_three_values() -> None:
+    for given, expected in (("repaired", "repaired"), ("blocked", "blocked"), ("none", "none"),
+                            ("helpdesk@northwind.example", "none"), (None, "none")):
+        line = QL.build_entry("employee", "q", result("answer", "t", guard_action=given),
+                              now=NOW, model="m", prompt_ver="1")
+        assert line["guard_action"] == expected, (given, line["guard_action"])
+        assert "helpdesk" not in json.dumps(line)
 
 
 def test_answer_question_reports_retrieved_count_and_leak_flag() -> None:

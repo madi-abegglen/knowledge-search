@@ -1,0 +1,743 @@
+{
+  "run_name": "guard_q5_repeats_v1",
+  "timestamp": "2026-10-12T05:28:26.367192+00:00",
+  "model": "claude-sonnet-5-5",
+  "prompt": {
+    "file": "answer_v1.md",
+    "version": "1"
+  },
+  "repeats": 20,
+  "summary": {
+    "5": {
+      "passes": 0,
+      "runs": 20,
+      "conflict_notes": 0,
+      "must_contain_ok": 0
+    }
+  },
+  "leaks": 0,
+  "results": {
+    "5": [
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5440.9,
+        "input_tokens": 2052,
+        "output_tokens": 472,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5014.3,
+        "input_tokens": 2052,
+        "output_tokens": 472,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5190.8,
+        "input_tokens": 2052,
+        "output_tokens": 473,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4984.4,
+        "input_tokens": 2052,
+        "output_tokens": 472,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4014.2,
+        "input_tokens": 2052,
+        "output_tokens": 489,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4684.4,
+        "input_tokens": 2052,
+        "output_tokens": 480,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5154.0,
+        "input_tokens": 2052,
+        "output_tokens": 472,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4964.3,
+        "input_tokens": 2052,
+        "output_tokens": 483,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4371.9,
+        "input_tokens": 2052,
+        "output_tokens": 472,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4363.0,
+        "input_tokens": 2052,
+        "output_tokens": 475,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 3894.5,
+        "input_tokens": 2052,
+        "output_tokens": 488,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5227.2,
+        "input_tokens": 2052,
+        "output_tokens": 487,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4851.8,
+        "input_tokens": 2052,
+        "output_tokens": 489,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5398.5,
+        "input_tokens": 2052,
+        "output_tokens": 483,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5610.1,
+        "input_tokens": 2052,
+        "output_tokens": 484,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5223.2,
+        "input_tokens": 2052,
+        "output_tokens": 485,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4256.9,
+        "input_tokens": 2052,
+        "output_tokens": 472,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4606.8,
+        "input_tokens": 2052,
+        "output_tokens": 483,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5283.5,
+        "input_tokens": 2052,
+        "output_tokens": 472,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "refuse",
+        "answer": "I couldn't find that.",
+        "citations": [],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 5366.8,
+        "input_tokens": 2052,
+        "output_tokens": 480,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "guard_action": "blocked",
+        "passed": false,
+        "reasons": [
+          "outcome refuse != expected answer",
+          "missing: Report Phish; security@northwind.example"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": false,
+        "citation_ok": false,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      }
+    ]
+  }
+}

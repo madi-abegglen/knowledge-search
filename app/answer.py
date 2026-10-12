@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
 import yaml
 
+from app.guard import ACTION_BLOCKED, ACTION_NONE, ACTION_REPAIRED, apply_exact_string_guard
 from app.retrieve import ROOT, get_user_groups, retrieve
 
 
@@ -174,6 +175,15 @@ def _strip_code_fence(raw: str) -> str:
     return raw
 
 
+_GUARD_RANK = {ACTION_NONE: 0, ACTION_REPAIRED: 1, ACTION_BLOCKED: 2}
+
+
+def _worst_guard_action(current: str, new: str) -> str:
+    """Across both attempts keep the most severe action (blocked > repaired > none), so a
+    hallucinated address that was caught and then recovered is still counted."""
+    return new if _GUARD_RANK[new] > _GUARD_RANK[current] else current
+
+
 def _runtime_result(
     outcome: str,
     message: str,
@@ -202,7 +212,9 @@ def answer_question(user: str, question: str) -> dict[str, Any]:
     monitoring (not part of the model schema): `retrieved_count`, the number of chunks
     that survived the permission filter, and `leak_scan_blocked`, True when the output
     leak scan replaced a model answer with a refusal."""
-    meta: dict[str, Any] = {"retrieved_count": 0, "leak_scan_blocked": False}
+    meta: dict[str, Any] = {
+        "retrieved_count": 0, "leak_scan_blocked": False, "guard_action": ACTION_NONE,
+    }
     result = _answer_question(user, question, meta)
     result.update(meta)
     return result
@@ -258,6 +270,17 @@ def _answer_question(user: str, question: str, meta: dict[str, Any]) -> dict[str
         )
         try:
             payload = AnswerPayload.model_validate_json(raw)
+            # Exact-string guard: only the permitted chunks passed to the model count.
+            guard = apply_exact_string_guard(
+                payload.answer, payload.conflict_note, [chunk["text"] for chunk in chunks]
+            )
+            meta["guard_action"] = _worst_guard_action(meta["guard_action"], guard.action)
+            if guard.action == ACTION_BLOCKED:
+                raise ValueError("exact-string guard: unverifiable email or URL")
+            if guard.action == ACTION_REPAIRED:
+                payload = payload.model_copy(
+                    update={"answer": guard.answer, "conflict_note": guard.conflict_note}
+                )
             if any(citation.source not in allowed_sources for citation in payload.citations):
                 raise ValueError("citation source was not retrieved")
             if _mentions_restricted_content(payload, restricted_labels):

@@ -86,7 +86,11 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 - [x] Alert thresholds in one place (`infra/thresholds.py`): any leak_scan_blocked = CRITICAL; error rate > 5%; 3+ consecutive errors; p95 > 10 s; refusal rate > 40% (eval baseline 24%); daily cost over `DAILY_COST_LIMIT_USD`.
 
 ### 7b. Known weaknesses to address (one per cycle; re-run evals after each retrieval/prompt change)
-- [ ] Exact-string guard: verify emails/URLs in an answer appear verbatim in retrieved context (alternative: prompt v2 exact-copy rule).
+- [x] Exact-string guard (`app/guard.py`): emails/URLs in an answer must appear in the permitted chunks; spaced ones are repaired, unknown ones blocked. Q5 20/20, Q1-Q25 25/25, 0 leaks. Found root cause: chunk text is tokenizer-decoded (lowercased, spaced).
+- [ ] **NEXT:** Indexed chunk text is the tokenizer's decoded form (lowercased, spaced punctuation, e.g. `security @ northwind. example`) and is what the model sees. Proper fix: store the original text span per chunk (embed from it); needs re-ingest, the chunk-cap assertion re-checked, and a full re-baseline of the evals.
+- [ ] Non-English questions are refused (English-only embedding model; Spanish/Japanese distances 0.74-0.85 vs 0.195). Needs a multilingual model and a re-baseline.
+- [ ] Guard gaps: `clarifying_question` is not scanned; capitalized label after a stray ". " fails closed.
+- [ ] Missing `MODEL_NAME` returns the standard refusal (a configuration error looks like "not found").
 
 ### 7c. Runbook and README
 - [ ] `docs/runbook.md`: symptom, likely cause, fix. Include: stale answers (re-ingest), wrong docs (tune chunking/top-k), **leak (disable app, audit metadata and filters)**, JSON failures (check prompt version).

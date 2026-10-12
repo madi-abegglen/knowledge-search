@@ -94,7 +94,8 @@ def longest_error_run(entries: list[dict[str, Any]]) -> int:
     return best
 
 
-def summarize(entries: list[dict[str, Any]], ratings: list[dict[str, Any]], malformed: int) -> dict[str, Any]:
+def summarize(entries: list[dict[str, Any]], ratings: list[dict[str, Any]], malformed: int,
+              prior_guard_blocked: int = 0) -> dict[str, Any]:
     total = len(entries)
     outcomes: dict[str, int] = defaultdict(int)
     for entry in entries:
@@ -126,6 +127,10 @@ def summarize(entries: list[dict[str, Any]], ratings: list[dict[str, Any]], malf
         "thumbs_down": downs,
         "thumbs_down_rate": (downs / len(ratings)) if ratings else None,
         "leak_scan_blocked": sum(1 for e in entries if e.get("leak_scan_blocked")),
+        # lines written before the guard existed have no guard_action: treated as "none"
+        "guard_repaired": sum(1 for e in entries if e.get("guard_action") == "repaired"),
+        "guard_blocked": sum(1 for e in entries if e.get("guard_action") == "blocked"),
+        "guard_blocked_prior": prior_guard_blocked,
         "longest_error_run": longest_error_run(entries),
         "malformed_lines": malformed,
     }
@@ -137,6 +142,12 @@ def evaluate_alerts(summary: dict[str, Any], t: AlertThresholds) -> list[Alert]:
         alerts.append(Alert("CRITICAL", "LEAK_SCAN_BLOCKED",
                             f"{summary['leak_scan_blocked']} response(s) blocked by the leak scan "
                             f"(allowed: {t.leak_scan_blocked_max}). Treat as a potential permission leak."))
+    if (summary["guard_blocked"] > t.guard_blocked_warn_above
+            and summary["guard_blocked"] > summary["guard_blocked_prior"]):
+        alerts.append(Alert("WARNING", "GUARD_BLOCKED_RISING",
+                            f"exact-string guard blocked {summary['guard_blocked']} answer(s), up from "
+                            f"{summary['guard_blocked_prior']} in the previous window: the model is producing "
+                            "emails/URLs that are not in the permitted context."))
     if summary["longest_error_run"] >= t.consecutive_errors_max:
         alerts.append(Alert("WARNING", "CONSECUTIVE_ERRORS",
                             f"{summary['longest_error_run']} errors in a row (limit {t.consecutive_errors_max})."))
@@ -184,6 +195,8 @@ def render(summary: dict[str, Any], alerts: list[Alert], t: AlertThresholds, day
             f"thumbs-down rate:   {_pct(summary['thumbs_down_rate'])} "
             f"({summary['thumbs_down']}/{summary['ratings']} ratings)",
             f"leak_scan_blocked:  {summary['leak_scan_blocked']}",
+            f"exact-string guard: repaired={summary['guard_repaired']}, blocked={summary['guard_blocked']} "
+            f"(previous window blocked={summary['guard_blocked_prior']})",
         ]
     lines.append(f"malformed lines:    {summary['malformed_lines']} (skipped)")
     if t.daily_cost_limit_usd is None:
@@ -200,10 +213,15 @@ def render(summary: dict[str, Any], alerts: list[Alert], t: AlertThresholds, day
 
 def run_report(directory: Path, days: int, thresholds: AlertThresholds,
                now: datetime | None = None) -> tuple[str, int]:
-    since = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+    now = now or datetime.now(timezone.utc)
+    since = now - timedelta(days=days)
     entries, malformed = load_entries(directory / QUERY_LOG_NAME, since)
     ratings = load_ratings(directory / FEEDBACK_NAME, since)
-    summary = summarize(entries, ratings, malformed)
+    earlier, _ = load_entries(directory / QUERY_LOG_NAME, since - timedelta(days=days))
+    prior_blocked = sum(
+        1 for e in earlier if e["_ts"] < since and e.get("guard_action") == "blocked"
+    )
+    summary = summarize(entries, ratings, malformed, prior_blocked)
     alerts = evaluate_alerts(summary, thresholds)
     return render(summary, alerts, thresholds, days), (1 if alerts else 0)
 
