@@ -1,0 +1,614 @@
+{
+  "run_name": "after_pairing_v1_repeats",
+  "timestamp": "2026-10-12T04:22:27.172433+00:00",
+  "model": "claude-sonnet-5-5",
+  "prompt": {
+    "file": "answer_v1.md",
+    "version": "1"
+  },
+  "repeats": 5,
+  "summary": {
+    "2": {
+      "passes": 5,
+      "runs": 5,
+      "conflict_notes": 5,
+      "must_contain_ok": 5
+    },
+    "22": {
+      "passes": 5,
+      "runs": 5,
+      "conflict_notes": 5,
+      "must_contain_ok": 5
+    },
+    "24": {
+      "passes": 5,
+      "runs": 5,
+      "conflict_notes": 5,
+      "must_contain_ok": 5
+    }
+  },
+  "leaks": 0,
+  "results": {
+    "2": [
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": "An older, superseded version of the PTO policy (version 2023.2) stated that up to 3 unused days carried over. The current 2025 policy (version 2025.1) allows up to 5.",
+        "clarifying_question": null,
+        "latency_ms": 2068.8,
+        "input_tokens": 1015,
+        "output_tokens": 171,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Any unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": "An older, superseded version of the PTO policy (version 2023.2) stated that up to 3 unused days carried over. That value is no longer current.",
+        "clarifying_question": null,
+        "latency_ms": 1801.7,
+        "input_tokens": 1015,
+        "output_tokens": 157,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Any unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": "The superseded 2023 PTO policy (version 2023.2) stated that up to 3 unused days carried over. The current 2025 policy (version 2025.1) replaces this with up to 5 days.",
+        "clarifying_question": null,
+        "latency_ms": 1884.3,
+        "input_tokens": 1015,
+        "output_tokens": 176,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Any unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": "An older, superseded version of the PTO policy (version 2023.2) stated that up to 3 unused days carry over. The current policy (version 2025.1) allows up to 5.",
+        "clarifying_question": null,
+        "latency_ms": 1914.0,
+        "input_tokens": 1015,
+        "output_tokens": 168,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": "The superseded 2023 PTO policy (version 2023.2) stated that up to 3 unused days carried over. That is no longer current; the 2025 policy allows up to 5.",
+        "clarifying_question": null,
+        "latency_ms": 1743.4,
+        "input_tokens": 1015,
+        "output_tokens": 168,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      }
+    ],
+    "22": [
+      {
+        "id": 22,
+        "user": "employee",
+        "question": "How far in advance do I need to request PTO for a 3-day absence?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "For an absence of 3 days or more, submit your PTO request in the HR portal at least 2 weeks ahead. Your manager responds within 3 business days.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "4. Requesting PTO"
+          }
+        ],
+        "conflict_note": "A superseded 2023 version of the PTO policy (version 2023.2) said to submit requests by email to your manager at least 1 week ahead. That is no longer current; the 2025 policy requires 2 weeks' notice via the HR portal.",
+        "clarifying_question": null,
+        "latency_ms": 1876.4,
+        "input_tokens": 1012,
+        "output_tokens": 201,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_holiday_calendar_2026.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 22,
+        "user": "employee",
+        "question": "How far in advance do I need to request PTO for a 3-day absence?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "For an absence of 3 days or more, submit your PTO request in the HR portal at least 2 weeks ahead. Your manager responds within 3 business days.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "4. Requesting PTO"
+          }
+        ],
+        "conflict_note": "The superseded 2023 PTO policy (version 2023.2) said to submit requests by email to your manager at least 1 week ahead. That is no longer current; the 2025 policy requires 2 weeks' notice via the HR portal.",
+        "clarifying_question": null,
+        "latency_ms": 1950.4,
+        "input_tokens": 1012,
+        "output_tokens": 198,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_holiday_calendar_2026.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 22,
+        "user": "employee",
+        "question": "How far in advance do I need to request PTO for a 3-day absence?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "For an absence of 3 days or more, submit your PTO request in the HR portal at least 2 weeks ahead. Your manager responds within 3 business days.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "4. Requesting PTO"
+          }
+        ],
+        "conflict_note": "The superseded 2023 PTO policy (version 2023.2) said to submit requests by email to your manager at least 1 week ahead. That is no longer current; the 2025 policy requires 2 weeks via the HR portal.",
+        "clarifying_question": null,
+        "latency_ms": 1915.2,
+        "input_tokens": 1012,
+        "output_tokens": 195,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_holiday_calendar_2026.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 22,
+        "user": "employee",
+        "question": "How far in advance do I need to request PTO for a 3-day absence?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "For an absence of 3 days or more, submit your PTO request in the HR portal at least 2 weeks ahead. Your manager responds within 3 business days.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "4. Requesting PTO"
+          }
+        ],
+        "conflict_note": "The superseded 2023 PTO policy (version 2023.2) said to submit requests by email to your manager at least 1 week ahead. That is no longer current; the 2025 policy requires 2 weeks' notice via the HR portal.",
+        "clarifying_question": null,
+        "latency_ms": 1925.2,
+        "input_tokens": 1012,
+        "output_tokens": 198,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_holiday_calendar_2026.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 22,
+        "user": "employee",
+        "question": "How far in advance do I need to request PTO for a 3-day absence?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "For an absence of 3 days or more, submit your PTO request in the HR portal at least 2 weeks ahead. Your manager responds within 3 business days.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "4. Requesting PTO"
+          }
+        ],
+        "conflict_note": "The superseded 2023 PTO policy (version 2023.2) said to submit requests by email to your manager at least 1 week ahead. That is no longer current; the 2025 policy requires 2 weeks via the HR portal.",
+        "clarifying_question": null,
+        "latency_ms": 1922.9,
+        "input_tokens": 1012,
+        "output_tokens": 195,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_holiday_calendar_2026.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      }
+    ],
+    "24": [
+      {
+        "id": 24,
+        "user": "employee",
+        "question": "When does a new full-time employee become eligible to use PTO?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Under the current 2025 PTO policy, all full-time employees are eligible to use PTO from their first day. PTO accrues per pay period and is available as it is earned.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "2. Eligibility"
+          },
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "3. Annual PTO allotment"
+          }
+        ],
+        "conflict_note": "The superseded 2023 policy (version 2023.2) required a 90-day introductory period before full-time employees were eligible. That is no longer current.",
+        "clarifying_question": null,
+        "latency_ms": 1761.2,
+        "input_tokens": 1016,
+        "output_tokens": 205,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 24,
+        "user": "employee",
+        "question": "When does a new full-time employee become eligible to use PTO?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "A new full-time employee is eligible to use PTO from their first day of employment. PTO accrues per pay period and is available as it is earned.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "2. Eligibility"
+          },
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "3. Annual PTO allotment"
+          }
+        ],
+        "conflict_note": "The superseded 2023 policy (version 2023.2) required a 90-day introductory period before full-time employees became eligible. That is no longer current; the 2025 policy (version 2025.1) makes full-time employees eligible from their first day.",
+        "clarifying_question": null,
+        "latency_ms": 1991.0,
+        "input_tokens": 1016,
+        "output_tokens": 225,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 24,
+        "user": "employee",
+        "question": "When does a new full-time employee become eligible to use PTO?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "A new full-time employee is eligible to use PTO from their first day of employment. PTO accrues per pay period and is available as it is earned.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "2. Eligibility"
+          },
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "3. Annual PTO allotment"
+          }
+        ],
+        "conflict_note": "The superseded 2023 policy (version 2023.2) required a 90-day introductory period before full-time employees became eligible. That is no longer current; the 2025 policy (version 2025.1) makes eligibility effective from the first day.",
+        "clarifying_question": null,
+        "latency_ms": 1906.1,
+        "input_tokens": 1016,
+        "output_tokens": 223,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 24,
+        "user": "employee",
+        "question": "When does a new full-time employee become eligible to use PTO?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "A new full-time employee is eligible to use PTO from their first day of employment. PTO accrues per pay period and is available as it is earned.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "2. Eligibility"
+          },
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "3. Annual PTO allotment"
+          }
+        ],
+        "conflict_note": "The superseded 2023 policy (version 2023.2) required a 90-day introductory period before full-time employees were eligible. That is no longer current; the 2025 policy (version 2025.1) makes full-time employees eligible from their first day.",
+        "clarifying_question": null,
+        "latency_ms": 1913.0,
+        "input_tokens": 1016,
+        "output_tokens": 225,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 24,
+        "user": "employee",
+        "question": "When does a new full-time employee become eligible to use PTO?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "A new full-time employee is eligible to use PTO from their first day of employment. PTO accrues per pay period and is available as it is earned.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "2. Eligibility"
+          },
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "3. Annual PTO allotment"
+          }
+        ],
+        "conflict_note": "The superseded 2023 policy (version 2023.2) required a 90-day introductory period before full-time employees were eligible. This is no longer current; the 2025 policy (version 2025.1) makes full-time employees eligible from their first day.",
+        "clarifying_question": null,
+        "latency_ms": 1951.3,
+        "input_tokens": 1016,
+        "output_tokens": 225,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": true,
+        "false_conflict_note": false,
+        "leaks": []
+      }
+    ]
+  }
+}

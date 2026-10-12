@@ -1,0 +1,94 @@
+{
+  "run_name": "heldout_q25_prefix",
+  "timestamp": "2026-10-12T04:14:04.206982+00:00",
+  "rescored_from": null,
+  "model": "claude-sonnet-5-5",
+  "prompt": {
+    "file": "answer_v1.md",
+    "version": "1"
+  },
+  "embed_model": "all-MiniLM-L6-v2",
+  "price_per_mtok": {
+    "input": 2.0,
+    "output": 10.0
+  },
+  "summary": {
+    "questions": 1,
+    "passed": 1,
+    "retrieval_hit": [
+      1,
+      1
+    ],
+    "outcome_accuracy": [
+      1,
+      1
+    ],
+    "correct_refusals": [
+      0,
+      0
+    ],
+    "false_refusals": [
+      0,
+      1
+    ],
+    "citation_correct": [
+      1,
+      1
+    ],
+    "must_contain": [
+      1,
+      1
+    ],
+    "conflict_flag": [
+      1,
+      1
+    ],
+    "false_conflict_notes": 0,
+    "false_conflict_ids": [],
+    "leaks": 0,
+    "latency_avg_ms": 2213.2,
+    "latency_p95_ms": 2213.2,
+    "input_tokens": 1023,
+    "output_tokens": 189,
+    "cost_total_usd": 0.003936
+  },
+  "results": [
+    {
+      "id": 25,
+      "user": "employee",
+      "question": "How many PTO days per year do employees with 3 to 5 years of service get?",
+      "expected_outcome": "answer",
+      "expected_source": [
+        "hr_pto_policy_2025.md"
+      ],
+      "actual_outcome": "answer",
+      "answer": "Employees with 3 to 5 years of service receive 25 PTO days per year under the current PTO policy. PTO accrues per pay period and is available as it is earned.",
+      "citations": [
+        {
+          "source": "hr_pto_policy_2025.md",
+          "section": "3. Annual PTO allotment"
+        }
+      ],
+      "conflict_note": "The superseded 2023 PTO policy (version 2023.2) listed 20 days per year for 3-5 years of service, but it has been replaced by the current 2025 policy of 25 days.",
+      "clarifying_question": null,
+      "latency_ms": 2213.2,
+      "input_tokens": 1023,
+      "output_tokens": 189,
+      "retrieved_sources": [
+        "hr_pto_policy_2025.md",
+        "hr_holiday_calendar_2026.md",
+        "hr_sabbatical_program.md",
+        "hr_parental_leave_us.md",
+        "hr_pto_policy_2023.md"
+      ],
+      "passed": true,
+      "reasons": [],
+      "retrieval_hit": true,
+      "must_contain_ok": true,
+      "citation_ok": true,
+      "conflict_ok": true,
+      "false_conflict_note": false,
+      "leaks": []
+    }
+  ]
+}

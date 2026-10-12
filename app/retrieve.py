@@ -16,7 +16,7 @@ COLLECTION_NAME = "knowledge_chunks"
 GROUPS = ("all", "hr", "finance", "sales", "exec")
 TOP_K = 8
 KEEP_BEST = 5
-SUPERSEDED_MARGIN = 0.10  # fixed a priori; not tuned against evals
+SUPERSEDED_SLOTS = 2
 
 
 def get_user_groups(user: str) -> frozenset[str]:
@@ -43,9 +43,18 @@ def _get_collection(chroma_path: str) -> Any:
     return client.get_collection(COLLECTION_NAME)
 
 
+def _version_key(chunk: dict[str, Any]) -> tuple[Any, Any] | None:
+    """Identity of a chunk across document versions: (title, section)."""
+    metadata = chunk["metadata"]
+    title, section = metadata.get("title"), metadata.get("section")
+    return (title, section) if title and section else None
+
+
 def _select_final(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Best current chunks first; reserve ONE slot for a superseded chunk of a
-    same-titled document so conflicts can surface. Superseded chunks go last."""
+    """Best current chunks first. A retained current chunk whose exact (title, section)
+    counterpart is a superseded chunk in the top 8 gets that counterpart reserved
+    (max SUPERSEDED_SLOTS), so conflicts can surface. Superseded chunks go last.
+    With no counterpart this is the plain sort-and-truncate."""
     by_distance = lambda chunk: chunk["distance"]  # noqa: E731
     current = sorted(
         (c for c in chunks if c["metadata"].get("doc_status") == "current"), key=by_distance
@@ -54,21 +63,26 @@ def _select_final(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
         (c for c in chunks if c["metadata"].get("doc_status") != "current"), key=by_distance
     )
 
-    head = current[: KEEP_BEST - 1]
-    titles = {chunk["metadata"].get("title") for chunk in head}
-    reserved = None
-    if current:
-        limit = current[0]["distance"] + SUPERSEDED_MARGIN
-        reserved = next(
+    reserved: list[dict[str, Any]] = []
+    always_kept = KEEP_BEST - SUPERSEDED_SLOTS  # the head never shrinks below this
+    for chunk in current[:always_kept]:
+        key = _version_key(chunk)
+        counterpart = next(
             (c for c in superseded
-             if c["metadata"].get("title") in titles and c["distance"] <= limit),
+             if key is not None and _version_key(c) == key
+             and all(c is not r for r in reserved)),
             None,
         )
-    if reserved is None:
+        if counterpart is not None:
+            reserved.append(counterpart)
+    reserved = reserved[:SUPERSEDED_SLOTS]
+
+    if not reserved:
         return (current + superseded)[:KEEP_BEST]
 
-    rest = [c for c in superseded if c is not reserved]
-    return (head + [reserved] + rest)[:KEEP_BEST]
+    head = current[: KEEP_BEST - len(reserved)]
+    rest = [c for c in superseded if all(c is not r for r in reserved)]
+    return (head + reserved + rest)[:KEEP_BEST]
 
 
 def retrieve(user: str, question: str) -> list[dict[str, Any]]:

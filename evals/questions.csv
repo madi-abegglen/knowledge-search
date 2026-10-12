@@ -23,3 +23,4 @@ id,user,question,expected_outcome,expected_source,must_contain,must_not_contain,
 22,employee,How far in advance do I need to request PTO for a 3-day absence?,answer,hr_pto_policy_2025.md,2 weeks|two weeks,,"Held-out (2d). 2023 section 4: 1 week ahead; 2025: 2 weeks for absences of 3+ days.",yes
 23,employee,Where do I submit a PTO request?,answer,hr_pto_policy_2025.md,HR portal,,"Held-out (2d). 2023 section 4: email to manager; 2025: HR portal.",yes
 24,employee,When does a new full-time employee become eligible to use PTO?,answer,hr_pto_policy_2025.md,first day,,"Held-out (2d). 2023 section 2: after 90-day introductory period; 2025: from first day.",yes
+25,employee,How many PTO days per year do employees with 3 to 5 years of service get?,answer,hr_pto_policy_2025.md,25,,"Blind (2d). 2023 PTO policy section 3: 20 days; 2025: 25. Added after Q21-Q24 were seen, before the pairing variant was implemented.",yes

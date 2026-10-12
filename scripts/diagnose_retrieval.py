@@ -76,7 +76,7 @@ def main(argv: list[str]) -> int:
     show(chunks, f"RAW top {R.TOP_K} from Chroma (before select), user={user}")
 
     selected = R._select_final([dict(c) for c in chunks])
-    show(selected, f"KEPT by _select_final (margin {R.SUPERSEDED_MARGIN})")
+    show(selected, f"KEPT by _select_final (superseded slots {R.SUPERSEDED_SLOTS})")
     live = [c["source"] for c in R.retrieve(user, question)]
     print("\nreplica matches retrieve():", live == [c["source"] for c in selected])
 

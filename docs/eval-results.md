@@ -228,3 +228,70 @@ Kept by `_select_final`: 2025 §3, 2025 §5 Carryover, sabbatical §5, 2025 §6,
 - **Pairing within the top 8 is the fix, but pairing by section for only the best current chunk is not enough.** The best current chunk for Q2 is 2025 §3, so a "same title + same section as the best current chunk" rule would again pick 2023 §3 and still miss Q2. What works is pairing each retained current chunk with its superseded counterpart (same title and section), which needs more than one reserved slot: for Q2, 2025 §3 <-> 2023 §3 and 2025 §5 <-> 2023 §5.
 - **Candidate rule to evaluate next:** reserve up to 2 slots (final = best 3 current + up to 2 superseded), choosing superseded chunks that match the (title, section) of the retained current chunks, nearest first, subject to the existing margin. Cost: one fewer current chunk in the prompt. Caveat: 2023 §5 sits at 0.4559 vs best current 0.3633, a gap of 0.0926, only 0.0074 inside the fixed 0.10 margin, so this particular fix is borderline under the gate.
 - **Unanswerable by prompt alone:** a prompt change cannot produce this flag, because the stale value never reaches the model.
+
+## Version pairing (2d)
+
+**Change:** `_select_final` in `app/retrieve.py`. The distance gate (`SUPERSEDED_MARGIN`) and the nearest-same-title reservation are removed. Each of the best 3 current chunks is paired with its exact same-title AND same-section superseded counterpart anywhere in the top 8; up to `SUPERSEDED_SLOTS = 2` counterparts are reserved, the current head shrinks accordingly (4 or 3 chunks), current first, superseded last. No counterpart means the old sort-and-truncate. Prompt unchanged (v1 default; v2 run for comparison). Unit tests: `scripts/test_select_final.py`, 8 cases.
+
+### How the questions relate to the design (read this first)
+
+- **Q21-Q24 were written before the fix was designed, but their retrieval was inspected before the variant was designed.** Q22 and Q24 failed pre-fix because their stale chunk (2023 section 4 at gap 0.126, 2023 section 2 at gap 0.192) was outside the old 0.10 margin; the variant was designed after seeing that. **So Q21-Q24 are not blind tests of this fix.**
+- **Q25 is the only blind question, and it is non-discriminating.** It was written after Q21-Q24 were seen and before the variant was implemented, but it passed pre-fix (`heldout_q25_prefix.json`) because it uses the same section 3 chunk as Q1, Q17 and Q21, which the old rule already paired. It can show no regression on section 3 questions; it cannot show the new rule works.
+- Q2 `expects_conflict` was also added after observing Q2 (see "Prompt v2").
+
+### Pre-registered predictions (recorded before running the new code)
+
+| Question | Pre-fix status (v1) | Predicted with pairing |
+|---|---|---|
+| Q2 (carryover) | not flagged (0/10) | **flagged** (2023 section 5 paired) |
+| Q22 (lead time) | not flagged | **flagged** (2023 section 4 paired) |
+| Q24 (eligibility) | not flagged | **flagged** (2023 section 2 paired) |
+| Q21, Q23, Q25, Q1, Q17 | flagged | stay flagged |
+| Stale-chunk count, original 20 questions | 6/20 (gate) | **higher than 6/20** (no gate: any retained PTO chunk with a counterpart in the top 8 pulls it in) |
+| Permission leaks | 0 | 0 (2023 doc is visible to all users) |
+
+### Results vs predictions
+
+Runs: `after_pairing_v1.json` (Q1-Q25, prompt v1), `after_pairing_v2.json` (Q1-Q25, prompt v2), `after_pairing_v1_repeats.json` and `after_pairing_v2_repeats.json` (Q2, Q22, Q24 x5 each). Comparison base for the 20 original questions: `baseline_2c_v1.json` (the 2b-gate run re-scored with `expects_conflict`).
+
+| Question | Pre-fix (v1) | Predicted | Pairing v1 (full run) | Pairing v2 (full run) | x5 repeats flagged (v1 / v2) | Prediction |
+|---|---|---|---|---|---|---|
+| Q2 carryover | not flagged (0/10, both versions) | flagged | flagged | flagged | 5/5 / 5/5 | **met** |
+| Q22 lead time | not flagged | flagged | flagged | flagged | 5/5 / 5/5 | **met** |
+| Q24 eligibility | not flagged | flagged | flagged | flagged | 5/5 / 5/5 | **met** |
+| Q1, Q17, Q21, Q23, Q25 | flagged | stay flagged | flagged | flagged | n/a | **met** |
+| Stale-chunk count, original 20 | 6/20 | higher than 6/20 | **7/20** | 7/20 | n/a | **met, modestly** (+Q6) |
+| Permission leaks | 0 | 0 | 0 | 0 | 0 / 0 | **met** |
+
+All 8 `expects_conflict=yes` questions are flagged under both prompts (8/8), 25/25 pass overall, **false conflict notes: 0** in both full runs, **0 permission leaks**. **Nothing got worse**: the compare against the gate baseline shows Q2 FAIL -> PASS and no regressions; v1 vs v2 shows no per-question differences.
+
+**Q2 under v2:** yes, it now gets a conflict note (5/5 repeats and the full run): "An older, superseded version of the PTO policy (hr_pto_policy_2023.md, version 2023.2) stated that up to 3 unused days carry over. That value is outdated; the current policy allows up to 5 days." The answer stays "up to 5 days". Under **v1 it also flags 5/5**: once the carryover chunk reaches the model, v1's existing conflict sentence is enough. The earlier 0/10 under both versions was a retrieval problem, as the Findings entry concluded.
+
+### Stale chunks in retrieved sets (original 20 questions)
+
+| Version | Retrieved sets with a stale chunk | Questions |
+|---|---|---|
+| Baseline (tightened) | 0/20 | none |
+| After 2b (reserve 1 slot, no gate) | 12/20 | 1, 2, 3, 6, 8, 9, 10, 13, 15, 17, 18, 20 |
+| After gate (margin 0.10) | 6/20 | 1, 2, 10, 13, 17, 20 |
+| After pairing (v1 and v2 identical) | **7/20** | 1, 2, 6, 10, 13, 17, 20 |
+
+- Pairing removes the gate yet only adds Q6 (meal limit), because stale chunks are now only pulled in when an exact (title, section) counterpart of one of the best 3 current chunks is in the top 8. The 2b run's noise on Q3, Q8, Q9, Q15, Q18 does not return.
+- **Two stale chunks instead of one** now appear in Q1, Q2, Q10 and Q17 (up to 2 slots). The extra stale chunk displaces the 4th current chunk (for example the holiday "Notes" chunk in Q1/Q17), which did not change any outcome.
+- Q6 and Q10 carry a stale chunk but get no `conflict_note` (false conflict notes stay 0): the prompt correctly ignores unrelated superseded content.
+- Q21-Q25 all carry a stale chunk by design (all are PTO policy questions).
+
+### Cost of the change
+
+Input tokens on the original 20 questions: 21,119 (gate, v1) vs 21,015 (pairing, v1) vs 23,775 (pairing, v2); so the pairing change itself is token-neutral at this scale. The full 25-question runs are 26,005 (v1) and 29,455 (v2) input tokens ($0.1000 vs $0.1081). v2 adds about 13% input tokens over v1 for no change in any outcome on this set; latency differences are noise.
+
+### Honest limits
+
+- **Q21-Q24 are not blind** (see above); only Q25 is, and it did not discriminate. The evidence that pairing works rests on Q2, Q22, Q24, written or inspected before the fix, plus the unit tests. It is a 25-question set on one superseded document pair; there is exactly one superseded document in the corpus.
+- The rule relies on **identical titles and identical section headings** across versions. A renamed section in a newer version would not pair and would fall back to old behavior (the conflict would not surface).
+- The 2-slot cap means at most 2 stale chunks; a question touching three differing facts would be partially flagged.
+- 5 repeats per question is a small sample; "5/5" bounds the failure rate loosely, it does not prove it is zero.
+
+### Prompt default
+
+**The default stays prompt v1** (`PROMPT_VERSION` unset means `1`). **v2 remains a candidate, not adopted:** with pairing in place Q2, Q22 and Q24 are flagged 5/5 under v1 as well, and the full 25-question runs have identical outcomes under both versions, so v2 shows no measurable gain on this set while costing about 13% more input tokens. The only v2-specific signal is Q5's exact-address check (9/10 under v1 vs 10/10 under v2 at n=10), which is within noise. Revisit v2 if a case appears where v1 fails to flag or alters an address.
