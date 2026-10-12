@@ -63,3 +63,21 @@ Users in `data/access.json`: `employee` [all], `hr_user` [all, hr], `exec_user` 
 - Commit after each phase with a clear message.
 - Never push to a remote without my explicit approval. Commits are fine; pushes always ask first.
 
+## Workflow: the ADLC loop
+Every phase follows these steps, in order. Full detail: `docs/adlc.md`.
+
+1. **Specify.** Re-read the phase in `docs/build-plan.md` and its "Done when". Say in two lines what you will build. Flag anything wrong or risky before starting.
+2. **Build one phase only.** No work from later phases. No new dependencies or architecture changes without asking.
+3. **Verify files exist.** After writing files, list them with their paths and confirm they are inside the repo (not `.venv` or `site-packages`).
+4. **Done-when check.** Run the phase's check with scripts or modules (never inline `python -c`). Show the **raw output**, not a summary. If a command fails to run, say so; never report it as passed.
+5. **Audit.** Run `python scripts/check_env.py --audit`. It must exit 0. Never edit `scripts/audit_exceptions.txt`.
+6. **Review gate.** Show `git status` and the diff summary. **Stop and wait for my review.**
+7. **Commit** only after I approve. Clear message. Never push without explicit approval; after a push, show the output.
+8. **Stop.** Do not start the next phase until I say so.
+
+Rules that apply in every step:
+- Failures are findings. Record what failed and the likely cause from the raw output; do not tune to make a failing check pass.
+- Eval changes: tune once per cycle, record before and after, bump the prompt version in `prompts/`.
+- Anything that touches permissions (retrieval filter, refusal text, UI display, logs) must be re-checked against Hard Rule 1 before the review gate.
+- Keep status in sync: when a phase is done, tick it here and in `docs/build-plan.md` in the same commit.
+
