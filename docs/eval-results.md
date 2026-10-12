@@ -162,3 +162,69 @@ No question got worse in either step. Latency, token and cost differences betwee
 ### Known limitation
 
 A fixed distance margin can miss a relevant stale chunk when a current chunk is much closer: if the best current chunk is more than 0.10 closer than the superseded chunk, the stale chunk is not reserved and the conflict cannot be flagged. The gate is also relative, so it only partly suppresses irrelevant stale chunks when no current chunk matches well (Q10, Q13, Q20). The 0.10 margin was fixed a priori and has not been validated beyond this 20-question set.
+
+## Prompt v2 (exact-copy rule + mandatory conflict_note)
+
+**Eval change first:** column `expects_conflict` = `yes` for Q1, Q2, Q17 (conflict_note must be non-null), plus an informational "false conflict notes" count. **`expects_conflict` was added AFTER observing Q2's behavior, so Q2 is not a blind test.**
+
+**Prompt change (only this):** `prompts/answer_v2.md` = v1 plus (a) an exact-copy rule for email addresses, URLs, file names and numbers, and (b) a mandatory `conflict_note` when a superseded chunk states a different value for the same fact (null when unrelated or in agreement). Default `PROMPT_VERSION` is unchanged (`1`); v2 is selected with `--prompt-version 2`. Retrieval code is unchanged.
+
+Runs: v1 = `after_2b_gate.json` re-scored with the new check (`baseline_2c_v1.json`, one run); v2 = `v2_full.json` (one run). Both use the same retrieval (gate, margin 0.10).
+
+### Full set, v1 vs v2
+
+| Metric | v1 (re-scored) | v2 |
+|---|---|---|
+| Questions passed | 19/20 | 19/20 |
+| Retrieval hit / outcome / citations | 13/13, 20/20, 13/13 | 13/13, 20/20, 13/13 |
+| Correct refusals / false refusals | 6/6 / 0/13 | 6/6 / 0/13 |
+| must_contain | 13/13 | 13/13 |
+| Conflict flagged (expects_conflict=yes) | 2/3 (Q1, Q17) | 2/3 (Q1, Q17) |
+| False conflict notes (informational) | 0 | 0 |
+| **Permission leaks** | **0** | **0** |
+| Latency avg / p95 (ms) | 1827 / 3203 | 1875 / 3634 |
+| Tokens in / out | 21,119 / 3,824 | 23,879 / 3,804 |
+| Cost total | $0.0805 | $0.0858 |
+
+**No question got worse.** The only failure under both versions is Q2 (no conflict_note). (A raw compare against the un-rescored `after_2b_gate.json` shows Q2 as PASS->FAIL; that is only because the old run was scored without `expects_conflict`.) Input tokens rose about 2,760 over 20 questions (+13%) from the longer prompt.
+
+### Repeats (10 runs each)
+
+| Question | v1 | v2 |
+|---|---|---|
+| Q5, exact address `security@northwind.example` intact | 9/10 | 10/10 |
+| Q2, conflict_note present | 0/10 | 0/10 |
+| Q2, answer contains 5 days (must_contain) | 10/10 | 10/10 |
+| Permission leaks (all repeat runs) | 0 | 0 |
+
+Q5: 9/10 -> 10/10 is a one-run difference at n=10; it is consistent with the exact-copy rule helping but is not strong evidence. Q2: v2 does not change the outcome, which is expected from the finding below (the prompt cannot flag a fact it is not shown).
+
+## Findings
+
+### Q2: conflict note missing, root cause is retrieval selection (not the prompt)
+
+**Observed:** Q2 ("How many unused PTO days carry over?") never carries a `conflict_note`: 0/10 under v1, 0/10 under v2. The answer ("up to 5 days") is correct; the 2023 policy said 3.
+
+**Raw top 8 from Chroma, before the select step** (`python scripts/diagnose_retrieval.py 2`, employee):
+
+| rank | distance | status | source | section |
+|---|---|---|---|---|
+| 1 | 0.3433 | superseded | hr_pto_policy_2023.md | 3. Annual PTO allotment |
+| 2 | 0.3633 | current | hr_pto_policy_2025.md | 3. Annual PTO allotment |
+| 3 | 0.3763 | current | hr_pto_policy_2025.md | 5. Carryover |
+| 4 | 0.4076 | current | hr_sabbatical_program.md | 5. Related |
+| 5 | 0.4143 | superseded | hr_pto_policy_2023.md | 6. Payout |
+| 6 | 0.4143 | current | hr_pto_policy_2025.md | 6. Payout |
+| 7 | **0.4559** | **superseded** | **hr_pto_policy_2023.md** | **5. Carryover** |
+| 8 | 0.4712 | current | hr_holiday_calendar_2026.md | Notes |
+
+Kept by `_select_final`: 2025 §3, 2025 §5 Carryover, sabbatical §5, 2025 §6, then **2023 §3 Annual PTO allotment** (the reserved slot).
+
+**Root cause:** the reserved slot goes to the nearest superseded chunk by distance (2023 §3, rank 1). That chunk states a different fact (new-hire allotment of 15 days) than the one asked about (carryover). The 2023 §5 Carryover chunk (3 days), the one that conflicts with the answer, **is in the top 8 (rank 7, distance 0.4559)** but is not selected. The model is therefore never shown a superseded carryover value, and v2's rule (b) correctly leaves `conflict_note` null for an unrelated superseded chunk. The `expects_conflict=yes` on Q2 is a retrieval requirement, not a prompt requirement.
+
+**Which fix would work (not implemented; no retrieval code was changed):**
+
+- **Expanding retrieval (larger top-k) is not needed here:** the stale carryover chunk is already in the top 8. The wider top-20 view shows the other 2023 chunks at ranks 5, 7, 13, 14.
+- **Pairing within the top 8 is the fix, but pairing by section for only the best current chunk is not enough.** The best current chunk for Q2 is 2025 §3, so a "same title + same section as the best current chunk" rule would again pick 2023 §3 and still miss Q2. What works is pairing each retained current chunk with its superseded counterpart (same title and section), which needs more than one reserved slot: for Q2, 2025 §3 <-> 2023 §3 and 2025 §5 <-> 2023 §5.
+- **Candidate rule to evaluate next:** reserve up to 2 slots (final = best 3 current + up to 2 superseded), choosing superseded chunks that match the (title, section) of the retained current chunks, nearest first, subject to the existing margin. Cost: one fewer current chunk in the prompt. Caveat: 2023 §5 sits at 0.4559 vs best current 0.3633, a gap of 0.0926, only 0.0074 inside the fixed 0.10 margin, so this particular fix is borderline under the gate.
+- **Unanswerable by prompt alone:** a prompt change cannot produce this flag, because the stale value never reaches the model.

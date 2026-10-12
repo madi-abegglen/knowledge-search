@@ -21,7 +21,7 @@ from typing import Any
 from dotenv import load_dotenv
 import yaml
 
-from app.answer import PROMPT_PATH, answer_question
+from app.answer import answer_question, prompt_path
 from app.retrieve import ROOT, get_user_groups, retrieve
 
 QUESTIONS_PATH = ROOT / "evals" / "questions.csv"
@@ -81,8 +81,9 @@ def percentile_95(values: list[float]) -> float:
 
 
 def prompt_meta() -> dict[str, str]:
-    data = front_matter(PROMPT_PATH)
-    return {"file": PROMPT_PATH.name, "version": str(data.get("version", "unknown"))}
+    path = prompt_path()
+    data = front_matter(path)
+    return {"file": path.name, "version": str(data.get("version", "unknown"))}
 
 
 def price(name: str) -> float | None:
@@ -153,12 +154,23 @@ def check_question(
         if not retrieval_hit:
             reasons.append("retrieval miss: " + "; ".join(s for s in expected_sources if s not in retrieved))
 
+    has_note = bool((result.get("conflict_note") or "").strip())
+    expects_conflict = row.get("expects_conflict", "").strip().casefold() == "yes"
+    conflict_ok: bool | None = None
+    if expects_conflict:
+        conflict_ok = has_note
+        if not has_note:
+            reasons.append("expected conflict_note, got none")
+    false_conflict_note = has_note and not expects_conflict
+
     return {
         "passed": not reasons,
         "reasons": reasons,
         "retrieval_hit": retrieval_hit,
         "must_contain_ok": must_contain_ok,
         "citation_ok": citation_ok,
+        "conflict_ok": conflict_ok,
+        "false_conflict_note": false_conflict_note,
         "leaks": leaks,
     }
 
@@ -252,6 +264,10 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "false_refusals": [sum(r["actual_outcome"] == "refuse" for r in answerable), len(answerable)],
         "citation_correct": [sum(bool(r["citation_ok"]) for r in answerable), len(answerable)],
         "must_contain": [sum(bool(r["must_contain_ok"]) for r in with_contain), len(with_contain)],
+        "conflict_flag": [sum(bool(r["conflict_ok"]) for r in results if r.get("conflict_ok") is not None),
+                          sum(1 for r in results if r.get("conflict_ok") is not None)],
+        "false_conflict_notes": sum(bool(r.get("false_conflict_note")) for r in results),
+        "false_conflict_ids": [r["id"] for r in results if r.get("false_conflict_note")],
         "leaks": sum(1 for r in results if r["leaks"]),
         "latency_avg_ms": round(sum(latencies) / len(latencies), 1) if latencies else 0.0,
         "latency_p95_ms": round(percentile_95(latencies), 1) if latencies else 0.0,
@@ -274,6 +290,8 @@ def print_report(results: list[dict[str, Any]], summary: dict[str, Any], cost: f
     print(f"false refusals:        {rate(*summary['false_refusals'])} (answerable questions refused)")
     print(f"citation correctness:  {rate(*summary['citation_correct'])} (answerable only)")
     print(f"must_contain pass:     {rate(*summary['must_contain'])}")
+    print(f"conflict flagged:      {rate(*summary['conflict_flag'])} (where expects_conflict=yes)")
+    print(f"false conflict notes:  {summary['false_conflict_notes']} {summary['false_conflict_ids']} (informational)")
     print(f"PERMISSION LEAKS:      {summary['leaks']}")
     print(f"latency avg / p95:     {summary['latency_avg_ms']:.0f} ms / {summary['latency_p95_ms']:.0f} ms")
     print(f"tokens in / out:       {summary['input_tokens']} / {summary['output_tokens']}")
@@ -283,26 +301,87 @@ def print_report(results: list[dict[str, Any]], summary: dict[str, Any], cost: f
         print(f"cost:                  ${cost:.4f} total, ${cost / summary['questions']:.4f} per query")
 
 
+def run_repeats(args: argparse.Namespace, rows: list[dict[str, str]],
+                documents: dict[str, dict[str, Any]]) -> int:
+    """Run each selected question args.repeat times; report pass counts per question."""
+    per_question: dict[int, list[dict[str, Any]]] = {}
+    for row in rows:
+        per_question[int(row["id"])] = [run_one(row, documents) for _ in range(args.repeat)]
+
+    print(f"{'id':>2} {'passes':>8} {'conflict_note':>13} {'must_contain':>12}  failure reasons")
+    leaks = 0
+    for qid, runs in per_question.items():
+        passes = sum(r["passed"] for r in runs)
+        notes = sum(bool((r.get("conflict_note") or "").strip()) for r in runs)
+        contain = sum(bool(r["must_contain_ok"]) for r in runs)
+        leaks += sum(1 for r in runs if r["leaks"])
+        reasons = sorted({reason for r in runs for reason in r["reasons"]})
+        print(f"{qid:>2} {passes:>3}/{args.repeat:<4} {notes:>8}/{args.repeat:<4} "
+              f"{contain:>7}/{args.repeat:<4}  {' | '.join(reasons)}")
+    print(f"PERMISSION LEAKS: {leaks}")
+
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = RESULTS_DIR / f"{args.name}.json"
+    payload = {
+        "run_name": args.name,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "model": os.environ.get("MODEL_NAME", "unset"),
+        "prompt": prompt_meta(),
+        "repeats": args.repeat,
+        "summary": {str(qid): {
+            "passes": sum(r["passed"] for r in runs),
+            "runs": len(runs),
+            "conflict_notes": sum(bool((r.get("conflict_note") or "").strip()) for r in runs),
+            "must_contain_ok": sum(bool(r["must_contain_ok"]) for r in runs),
+        } for qid, runs in per_question.items()},
+        "leaks": leaks,
+        "results": {str(qid): runs for qid, runs in per_question.items()},
+    }
+    out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"\nsaved: {out_path.relative_to(ROOT)}")
+    return 1 if leaks else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", default="baseline", help="results file name (evals/results/<name>.json)")
     parser.add_argument("--rescore", metavar="NAME",
                         help="re-score evals/results/NAME.json with the current CSV, offline (no API calls)")
+    parser.add_argument("--only", metavar="IDS", help="comma-separated question ids to run, e.g. 2,5")
+    parser.add_argument("--repeat", type=int, default=1, metavar="N",
+                        help="run each selected question N times and report pass counts")
+    parser.add_argument("--prompt-version", metavar="V",
+                        help="prompt version to use (prompts/answer_v{V}.md); overrides PROMPT_VERSION")
     args = parser.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if args.prompt_version:
+        os.environ["PROMPT_VERSION"] = args.prompt_version
+    if args.repeat < 1:
+        parser.error("--repeat must be >= 1")
 
     load_dotenv(ROOT / ".env")
     documents = load_documents()
+    rows = load_questions()
+    if args.only:
+        wanted = {int(x) for x in args.only.split(",") if x.strip()}
+        rows = [row for row in rows if int(row["id"]) in wanted]
+        if not rows:
+            parser.error("--only matched no question ids")
+    if args.repeat > 1 and args.rescore:
+        parser.error("--repeat cannot be combined with --rescore")
+    if args.repeat > 1:
+        return run_repeats(args, rows, documents)
+
     stored_meta: dict[str, Any] = {}
     if args.rescore:
         if args.name == args.rescore:
             parser.error("--name must differ from --rescore so the original results are kept")
         stored_meta = json.loads((RESULTS_DIR / f"{args.rescore}.json").read_text(encoding="utf-8"))
         stored = {r["id"]: r for r in stored_meta["results"]}
-        results = [rescore_one(row, stored[int(row["id"])], documents) for row in load_questions()]
+        results = [rescore_one(row, stored[int(row["id"])], documents) for row in rows]
     else:
-        results = [run_one(row, documents) for row in load_questions()]
+        results = [run_one(row, documents) for row in rows]
     summary = summarize(results)
 
     price_in, price_out = price("PRICE_INPUT_PER_MTOK"), price("PRICE_OUTPUT_PER_MTOK")

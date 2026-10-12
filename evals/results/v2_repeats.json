@@ -1,0 +1,863 @@
+{
+  "run_name": "v2_repeats",
+  "timestamp": "2026-10-12T03:55:24.238625+00:00",
+  "model": "claude-sonnet-5-5",
+  "prompt": {
+    "file": "answer_v2.md",
+    "version": "2"
+  },
+  "repeats": 10,
+  "summary": {
+    "2": {
+      "passes": 0,
+      "runs": 10,
+      "conflict_notes": 0,
+      "must_contain_ok": 10
+    },
+    "5": {
+      "passes": 10,
+      "runs": 10,
+      "conflict_notes": 0,
+      "must_contain_ok": 10
+    }
+  },
+  "leaks": 0,
+  "results": {
+    "2": [
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1577.4,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1456.3,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1386.0,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1411.6,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1395.7,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1415.1,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1333.3,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1373.1,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1420.6,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 2,
+        "user": "employee",
+        "question": "How many unused PTO days carry over?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "hr_pto_policy_2025.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Up to 5 unused PTO days carry over into the next calendar year. Unused days beyond that are forfeited on January 31.",
+        "citations": [
+          {
+            "source": "hr_pto_policy_2025.md",
+            "section": "5. Carryover"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 1323.9,
+        "input_tokens": 1151,
+        "output_tokens": 112,
+        "retrieved_sources": [
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2025.md",
+          "hr_sabbatical_program.md",
+          "hr_pto_policy_2025.md",
+          "hr_pto_policy_2023.md"
+        ],
+        "passed": false,
+        "reasons": [
+          "expected conflict_note, got none"
+        ],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": false,
+        "false_conflict_note": false,
+        "leaks": []
+      }
+    ],
+    "5": [
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour. Use the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message unless security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 3898.5,
+        "input_tokens": 1164,
+        "output_tokens": 561,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour. Use the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Do not delete the message unless security instructs you to, so the evidence is preserved. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4778.7,
+        "input_tokens": 1164,
+        "output_tokens": 644,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour. Use the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Do not delete the message unless security instructs you to. Prompt reporting is always appreciated, even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4263.8,
+        "input_tokens": 1164,
+        "output_tokens": 588,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour. Use the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Do not delete the message or reboot your device unless security tells you to, so the evidence is preserved. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4196.2,
+        "input_tokens": 1164,
+        "output_tokens": 529,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour, using the \"report phish\" button in your email client or by emailing security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Do not delete the message or reboot your device unless security tells you to, so the evidence is preserved. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4366.6,
+        "input_tokens": 1164,
+        "output_tokens": 574,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour. Use the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Do not delete the message or reboot your device unless security instructs you to, so the evidence is preserved. Prompt reporting is always appreciated, even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4845.4,
+        "input_tokens": 1164,
+        "output_tokens": 580,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour. Use the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Do not delete the message unless security instructs you to, so the evidence is preserved. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4171.5,
+        "input_tokens": 1164,
+        "output_tokens": 557,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately (within 1 hour) using the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Do not delete the message or reboot your device unless security instructs you to, so the evidence is preserved. Prompt reporting is always appreciated, even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4233.1,
+        "input_tokens": 1164,
+        "output_tokens": 576,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately (within 1 hour). Use the \"report phish\" button in your email client, or email security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message or rebooting your device unless security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 4761.8,
+        "input_tokens": 1164,
+        "output_tokens": 591,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      },
+      {
+        "id": 5,
+        "user": "employee",
+        "question": "How do I report a phishing email?",
+        "expected_outcome": "answer",
+        "expected_source": [
+          "it_security_incident_reporting.md"
+        ],
+        "actual_outcome": "answer",
+        "answer": "Report it immediately, within 1 hour, using the \"Report Phish\" button in your email client or by emailing security@northwind.example. Do not click links, open attachments, or forward the suspicious message. Preserve evidence by not deleting the message unless security instructs you to. Prompt reporting is appreciated even if you have already clicked a link.",
+        "citations": [
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What to do"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "What counts as an incident"
+          },
+          {
+            "source": "it_security_incident_reporting.md",
+            "section": "No blame"
+          }
+        ],
+        "conflict_note": null,
+        "clarifying_question": null,
+        "latency_ms": 3841.8,
+        "input_tokens": 1164,
+        "output_tokens": 510,
+        "retrieved_sources": [
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "it_security_incident_reporting.md",
+          "hr_parental_leave_us.md",
+          "it_faq.md"
+        ],
+        "passed": true,
+        "reasons": [],
+        "retrieval_hit": true,
+        "must_contain_ok": true,
+        "citation_ok": true,
+        "conflict_ok": null,
+        "false_conflict_note": false,
+        "leaks": []
+      }
+    ]
+  }
+}

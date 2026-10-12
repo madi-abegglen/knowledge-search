@@ -17,7 +17,6 @@ from app.retrieve import ROOT, get_user_groups, retrieve
 
 
 REFUSAL_MESSAGE = "I couldn't find that."
-PROMPT_PATH = ROOT / "prompts" / "answer_v1.md"
 CONTEXT_START = "<<<BEGIN_RETRIEVED_CONTEXT>>>"
 CONTEXT_END = "<<<END_RETRIEVED_CONTEXT>>>"
 CONTEXT_END_ESCAPED = "&lt;&lt;&lt;END_RETRIEVED_CONTEXT&gt;&gt;&gt;"
@@ -48,18 +47,27 @@ class AnswerPayload(BaseModel):
         return self
 
 
+def prompt_path() -> Path:
+    """prompts/answer_v{PROMPT_VERSION}.md; PROMPT_VERSION env var, default "1"."""
+    version = os.environ.get("PROMPT_VERSION", "1").strip() or "1"
+    if not re.fullmatch(r"[0-9]+", version):
+        raise ValueError("PROMPT_VERSION must be a number")
+    return ROOT / "prompts" / f"answer_v{version}.md"
+
+
 def _load_prompt() -> str:
-    text = PROMPT_PATH.read_text(encoding="utf-8")
+    path = prompt_path()
+    text = path.read_text(encoding="utf-8")
     parts = text.split("---", 2)
     if len(parts) != 3 or parts[0].strip():
-        raise ValueError(f"{PROMPT_PATH}: expected YAML front matter")
+        raise ValueError(f"{path}: expected YAML front matter")
     front_matter = yaml.safe_load(parts[1])
     required = ("version", "owner", "model", "purpose", "changelog")
     if not isinstance(front_matter, dict) or any(key not in front_matter for key in required):
-        raise ValueError(f"{PROMPT_PATH}: incomplete prompt front matter")
+        raise ValueError(f"{path}: incomplete prompt front matter")
     body = parts[2].strip()
     if not body:
-        raise ValueError(f"{PROMPT_PATH}: prompt body is empty")
+        raise ValueError(f"{path}: prompt body is empty")
     return body
 
 

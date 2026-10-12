@@ -1,11 +1,16 @@
-"""Diagnose Q17 retrieval ordering and inspect raw baseline answers (read-only).
+"""Diagnose retrieval ordering for one eval question (read-only, no API calls).
 
-Run from the repo root:  .\\.venv\\Scripts\\python.exe scripts\\diagnose_retrieval.py
+Run from the repo root:
+  .\\.venv\\Scripts\\python.exe scripts\\diagnose_retrieval.py [question_id]   (default 17)
+
 Replicates the query in app.retrieve.retrieve() but prints the raw top 8 BEFORE
-the sort/truncate. Does not modify any app code.
+the select step, then what _select_final keeps. Also prints a wider top-20 view
+(informational) to see where superseded chunks rank. Does not modify app code.
 """
 
+import csv
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -15,15 +20,21 @@ sys.path.insert(0, str(ROOT))
 
 from app import retrieve as R  # noqa: E402
 
-USER = "employee"
-QUESTION = "Is new-hire PTO 15 or 20 days?"
-BASELINE = ROOT / "evals" / "results" / "baseline.json"
+QUESTIONS = ROOT / "evals" / "questions.csv"
+STORED = ROOT / "evals" / "results" / "after_2b_gate.json"
+WIDE = 20
 
 
-def raw_top_k() -> list[dict]:
-    import os
+def load_question(qid: int) -> tuple[str, str]:
+    with QUESTIONS.open(encoding="utf-8", newline="") as handle:
+        for row in csv.DictReader(handle):
+            if int(row["id"]) == qid:
+                return row["user"], row["question"]
+    raise SystemExit(f"question id {qid} not found in {QUESTIONS.name}")
 
-    groups = R.get_user_groups(USER)
+
+def raw_top_k(user: str, question: str, n_results: int) -> list[dict]:
+    groups = R.get_user_groups(user)
     conditions = [{f"grp_{g}": True} for g in R.GROUPS if g in groups]
     where = conditions[0] if len(conditions) == 1 else {"$or": conditions}
     R.load_dotenv(R.ROOT / ".env")
@@ -32,17 +43,17 @@ def raw_top_k() -> list[dict]:
     path = configured if configured.is_absolute() else R.ROOT / configured
     collection = R._get_collection(str(path))
     embedding = model.encode(
-        QUESTION, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False
+        question, convert_to_numpy=True, normalize_embeddings=True, show_progress_bar=False
     )
     res = collection.query(
         query_embeddings=[embedding.tolist()],
-        n_results=min(R.TOP_K, collection.count()),
+        n_results=min(n_results, collection.count()),
         where=where,
         include=["documents", "metadatas", "distances"],
     )
     return [
         {"metadata": res["metadatas"][0][i], "distance": float(res["distances"][0][i]),
-         "source": res["metadatas"][0][i]["source"]}
+         "source": res["metadatas"][0][i]["source"], "text": res["documents"][0][i]}
         for i in range(len(res["documents"][0]))
     ]
 
@@ -56,49 +67,42 @@ def show(rows: list[dict], title: str) -> None:
               f"{row['source']:<30} {m.get('section', '?')}")
 
 
-def main() -> int:
-    chunks = raw_top_k()
-    show(chunks, f"RAW top {R.TOP_K} from Chroma (before sort/truncate), user={USER}")
+def main(argv: list[str]) -> int:
+    qid = int(argv[0]) if argv else 17
+    user, question = load_question(qid)
+    print(f"Q{qid} user={user}: {question}")
 
-    ordered = sorted(chunks, key=lambda c: (c["metadata"].get("doc_status") != "current", c["distance"]))
-    show(ordered, "AFTER sort (current first, then distance) - all 8")
-    show(ordered[: R.KEEP_BEST], f"KEPT after truncate to {R.KEEP_BEST}")
+    chunks = raw_top_k(user, question, R.TOP_K)
+    show(chunks, f"RAW top {R.TOP_K} from Chroma (before select), user={user}")
 
-    dropped = ordered[R.KEEP_BEST:]
-    print("\nDROPPED by the sort/truncate:")
-    for row in dropped:
-        print(f"  {row['source']} / {row['metadata'].get('section')} "
-              f"({row['metadata'].get('doc_status')}, distance {row['distance']:.4f})")
-    in_raw = sorted({r["source"] for r in chunks})
-    print("\nsources in raw top 8:", in_raw)
+    selected = R._select_final([dict(c) for c in chunks])
+    show(selected, f"KEPT by _select_final (margin {R.SUPERSEDED_MARGIN})")
+    live = [c["source"] for c in R.retrieve(user, question)]
+    print("\nreplica matches retrieve():", live == [c["source"] for c in selected])
+
+    superseded_top8 = [c for c in chunks if c["metadata"].get("doc_status") != "current"]
     print("superseded chunks in raw top 8:",
-          sum(r["metadata"].get("doc_status") != "current" for r in chunks))
+          [(c["source"], c["metadata"].get("section"), round(c["distance"], 4)) for c in superseded_top8])
 
-    live = [c["source"] for c in R.retrieve(USER, QUESTION)]
-    kept = [c["source"] for c in ordered[: R.KEEP_BEST]]
-    print("\nretrieve() sources:", live)
-    print("replica matches retrieve():", live == kept)
+    wide = raw_top_k(user, question, WIDE)
+    print(f"\nWIDER view (informational, not what the app retrieves): top {WIDE}, superseded chunks only")
+    for rank, row in enumerate(wide, 1):
+        if row["metadata"].get("doc_status") != "current":
+            m = row["metadata"]
+            print(f"  rank {rank:>2}  {row['distance']:.4f}  {row['source']}  {m.get('section')}")
 
-    data = json.loads(BASELINE.read_text(encoding="utf-8"))
-    by_id = {r["id"]: r for r in data["results"]}
-
-    print("\n=== Q5 raw answer (repr) ===")
-    answer5 = by_id[5]["answer"]
-    print(repr(answer5))
-    match = re.search(r"security.{0,12}northwind.{0,12}", answer5, flags=re.IGNORECASE)
-    if match:
-        text = match.group(0)
-        print("email region:", repr(text))
-        print("code points:", [f"{c}:U+{ord(c):04X}" for c in text])
-    else:
-        print("no 'security...northwind' region found")
-
-    print("\n=== Q17 full result ===")
-    r17 = by_id[17]
-    for key in ("answer", "conflict_note", "clarifying_question", "citations", "retrieved_sources"):
-        print(f"{key}: {json.dumps(r17[key], ensure_ascii=False)}")
+    if STORED.exists():
+        stored = {r["id"]: r for r in json.loads(STORED.read_text(encoding="utf-8"))["results"]}
+        r = stored.get(qid)
+        if r:
+            print(f"\n=== stored result Q{qid} ({STORED.name}) ===")
+            for key in ("answer", "conflict_note", "citations", "retrieved_sources"):
+                print(f"{key}: {json.dumps(r[key], ensure_ascii=False)}")
+            if qid == 5:
+                match = re.search(r"security.{0,12}northwind.{0,12}", r["answer"], flags=re.IGNORECASE)
+                print("email region:", repr(match.group(0)) if match else "not found")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
