@@ -25,6 +25,16 @@ def load(name: str) -> dict:
     return json.loads((RESULTS / f"{name}.json").read_text(encoding="utf-8"))
 
 
+def superseded_sources() -> set[str]:
+    """Sources whose front matter says doc_status: superseded."""
+    found = set()
+    for path in (RESULTS.parent.parent / "data").glob("*.md"):
+        head = path.read_text(encoding="utf-8").split("---", 2)
+        if len(head) == 3 and "doc_status: superseded" in head[1]:
+            found.add(path.name)
+    return found
+
+
 def fmt(value) -> str:
     return f"{value[0]}/{value[1]}" if isinstance(value, list) else str(value)
 
@@ -64,6 +74,11 @@ def main(argv: list[str]) -> int:
         if notes:
             print(f"  Q{qid}: " + "; ".join(notes))
     print("questions that got WORSE:", worse or "none")
+
+    superseded = superseded_sources()
+    for name, data in ((argv[0], rb), (argv[1], ra)):
+        hit = [q for q, r in sorted(data.items()) if superseded.intersection(r["retrieved_sources"])]
+        print(f"retrieved sets with a superseded chunk [{name}]: {len(hit)}/{len(data)} {hit}")
 
     for qid in sorted(show_ids):
         for label, r in ((argv[0], rb[qid]), (argv[1], ra[qid])):

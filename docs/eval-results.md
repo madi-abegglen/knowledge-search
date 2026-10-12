@@ -121,3 +121,44 @@ No question got worse. Two went FAIL -> PASS, but only one is attributable to th
 ### Side effect to be aware of
 
 In 12 of 20 questions the retrieved set changed because the reserved slot is filled by a `hr_pto_policy_2023.md` chunk whenever a `PTO Policy` chunk is among the top 4 current chunks, including unrelated questions (Q6 meals, Q8 PO, Q10 exec bonus, Q13, Q20). In every case it replaced the lowest-ranked current chunk, and no outcome, citation or answer changed, but it is a noise chunk in the prompt for those questions. The 2023 doc is allowed for all users, so this introduces no permission exposure. Possible refinement for later (not done): only reserve the slot when the superseded chunk is close in distance to the best current chunk.
+
+## After change 2b-prime (distance gate on the reserved slot)
+
+**Change (one only):** in `_select_final`, the superseded chunk is reserved only if its distance <= (best current chunk's distance + `SUPERSEDED_MARGIN`). `SUPERSEDED_MARGIN = 0.10`, fixed before looking at eval results and not tuned. Otherwise the old sort-and-truncate behavior applies (also when there are no current chunks). Permission filter, prompt (v1), chunking unchanged. Unit tests: 8 cases in `scripts/test_select_final.py` (adds within-margin, outside-margin, margin measured from best current, no-current).
+
+Run: `python -m evals.run_evals --name after_2b_gate` -> `evals/results/after_2b_gate.json`.
+
+### Three-way comparison
+
+| Metric | Baseline (tightened Q5) | After 2b | After 2b + gate |
+|---|---|---|---|
+| Questions passed | 18/20 | 20/20 | 20/20 |
+| Retrieval hit rate | 13/13 | 13/13 | 13/13 |
+| Outcome accuracy | 20/20 | 20/20 | 20/20 |
+| Correct refusals | 6/6 | 6/6 | 6/6 |
+| False refusals | 0/13 | 0/13 | 0/13 |
+| Citation correctness | 13/13 | 13/13 | 13/13 |
+| must_contain pass | 11/13 | 13/13 | 13/13 |
+| **Permission leaks** | **0** | **0** | **0** |
+| Retrieved sets containing a superseded chunk | **0/20** | **12/20** (Q1,2,3,6,8,9,10,13,15,17,18,20) | **6/20** (Q1,2,10,13,17,20) |
+| Latency avg / p95 (ms) | 1871 / 3572 | 1860 / 3342 | 1827 / 3203 |
+| Tokens in / out | 21,258 / 3,770 | 21,089 / 3,726 | 21,119 / 3,824 |
+| Cost total | $0.0802 | $0.0794 | $0.0805 |
+
+No question got worse in either step. Latency, token and cost differences between 2b and the gate are within run-to-run noise (the model call is not deterministic).
+
+### What the gate did
+
+- **Superseded chunks in retrieved sets: 12 -> 6.** It removed the 2023 chunk from Q3, Q6, Q8, Q9, Q15, Q18 (holidays, meals, PO, parental leave, Germany, vague vacation), which are unrelated or only loosely related to PTO.
+- **Q1 and Q17 keep the 2023 chunk** and both still return 20 days with a `conflict_note` (raw answers below).
+- **Q10, Q13, Q20 still carry a 2023 PTO chunk.** These are exec-bonus / CEO-bonus / injection questions where the best current chunk the employee or HR user can see is itself a weak match, so a PTO chunk falls within 0.10 of it. The gate is relative to the best current chunk, so it filters less when nothing relevant is visible. No answer or outcome changed (all still refuse).
+- **Q2 (carryover):** the 2023 chunk reaches the model in both 2b and the gate, but `conflict_note` is `null` and the answer is "Up to 5 unused PTO days" (2023 policy said 3). That is a missed conflict flag on a question where the stale value differs; it is not counted as a failure because the eval set does not require a flag for Q2. This is a model-behavior gap under prompt v1, not a retrieval gap.
+
+### Q1 and Q17 raw answers (after_2b_gate)
+
+- **Q1** answer: "New hires (0-2 years of service) get 20 PTO days per year under the current policy. ..." conflict_note: "The superseded 2023 PTO policy (version 2023.2) listed 15 days per year for new hires (0-2 years of service). That value is outdated and replaced by the current 20 days." citations: `hr_pto_policy_2025.md` §3 Annual PTO allotment, §2 Eligibility.
+- **Q17** answer: "New-hire PTO is 20 days per year under the current policy (version 2025.1), covering employees with 0-2 years of service. ..." conflict_note: "The superseded 2023 PTO policy (version 2023.2) listed 15 days per year for new hires. That value is no longer current." citations: `hr_pto_policy_2025.md` §3 Annual PTO allotment.
+
+### Known limitation
+
+A fixed distance margin can miss a relevant stale chunk when a current chunk is much closer: if the best current chunk is more than 0.10 closer than the superseded chunk, the stale chunk is not reserved and the conflict cannot be flagged. The gate is also relative, so it only partly suppresses irrelevant stale chunks when no current chunk matches well (Q10, Q13, Q20). The 0.10 margin was fixed a priori and has not been validated beyond this 20-question set.

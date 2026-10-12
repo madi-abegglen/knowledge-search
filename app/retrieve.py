@@ -16,6 +16,7 @@ COLLECTION_NAME = "knowledge_chunks"
 GROUPS = ("all", "hr", "finance", "sales", "exec")
 TOP_K = 8
 KEEP_BEST = 5
+SUPERSEDED_MARGIN = 0.10  # fixed a priori; not tuned against evals
 
 
 def get_user_groups(user: str) -> frozenset[str]:
@@ -55,7 +56,14 @@ def _select_final(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
     head = current[: KEEP_BEST - 1]
     titles = {chunk["metadata"].get("title") for chunk in head}
-    reserved = next((c for c in superseded if c["metadata"].get("title") in titles), None)
+    reserved = None
+    if current:
+        limit = current[0]["distance"] + SUPERSEDED_MARGIN
+        reserved = next(
+            (c for c in superseded
+             if c["metadata"].get("title") in titles and c["distance"] <= limit),
+            None,
+        )
     if reserved is None:
         return (current + superseded)[:KEEP_BEST]
 

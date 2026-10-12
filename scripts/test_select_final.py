@@ -78,6 +78,44 @@ def test_two_current_reserved_and_extras_fill_without_duplicates() -> None:
     assert len(set(ids(out))) == len(out), "duplicates"
 
 
+def _pto_case(superseded_distance: float) -> list[dict]:
+    return [
+        chunk("cur_a", 0.20, title="PTO Policy"),
+        chunk("cur_b", 0.30, title="PTO Policy"),
+        chunk("cur_c", 0.40, title="Holiday"),
+        chunk("cur_d", 0.50, title="Holiday"),
+        chunk("cur_e", 0.55, title="Holiday"),
+        chunk("cur_f", 0.70, title="Holiday"),
+        chunk("old_a", superseded_distance, "superseded", "PTO Policy"),
+    ]
+
+
+def test_superseded_within_margin_is_reserved() -> None:
+    chunks = _pto_case(0.29)  # best current 0.20 + 0.10 margin
+    out = _select_final(chunks)
+    assert ids(out) == ["cur_a", "cur_b", "cur_c", "cur_d", "old_a"], ids(out)
+    assert ids(out) != ids(old_behavior(chunks))
+
+
+def test_superseded_outside_margin_uses_old_behavior() -> None:
+    chunks = _pto_case(0.35)  # title matches but 0.15 behind best current
+    out = _select_final(chunks)
+    assert ids(out) == ids(old_behavior(chunks)), ids(out)
+    assert all(c["metadata"]["doc_status"] == "current" for c in out)
+
+
+def test_margin_is_measured_from_best_current_not_head() -> None:
+    chunks = _pto_case(0.29)
+    chunks[0]["distance"] = 0.10  # best current is now 0.10 -> limit 0.20; 0.29 is outside
+    assert ids(_select_final(chunks)) == ids(old_behavior(chunks))
+
+
+def test_no_current_chunks_uses_old_behavior() -> None:
+    chunks = [chunk("old_a", 0.2, "superseded", "PTO Policy"),
+              chunk("old_b", 0.3, "superseded", "PTO Policy")]
+    assert ids(_select_final(chunks)) == ids(old_behavior(chunks))
+
+
 def test_empty_input() -> None:
     assert _select_final([]) == []
 
