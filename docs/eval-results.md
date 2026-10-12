@@ -13,7 +13,7 @@
 | Prompt | `prompts/answer_v1.md`, version `1` |
 | Embedding model | `all-MiniLM-L6-v2` |
 | Questions | 20 (`evals/questions.csv`), run sequentially through `answer_question()` |
-| Prices | read from `.env` (`PRICE_INPUT_PER_MTOK=2.00`, `PRICE_OUTPUT_PER_MTOK=10.00`); not verified against a price list |
+| Prices | read from `.env` (`PRICE_INPUT_PER_MTOK=2.00`, `PRICE_OUTPUT_PER_MTOK=10.00`); verified by the owner against the current pricing page |
 
 Checks are deterministic substring matches (case-insensitive). No LLM judge. n=20 is a small sample: treat the rates as a smoke test, not a benchmark.
 

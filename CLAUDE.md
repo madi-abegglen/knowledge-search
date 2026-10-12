@@ -13,7 +13,10 @@ Full build plan: `docs/build-plan.md`. Problem statement and success metrics: `d
 - [x] Phase 4: permission-aware retrieval + 3-outcome answers 
 - [x] Phase 5: Streamlit UI
 - [x] Phase 6: evals and edge-case testing
-- [ ] Phase 7: monitoring, runbook, README **<- start here**
+- [ ] Phase 7: monitoring, runbook, README **<- in progress**
+  - [x] 7a monitoring (query log, `infra/report.py`, alert thresholds)
+  - [ ] 7b fix known weaknesses (one per cycle) **<- next**
+  - [ ] 7c `docs/runbook.md` and README
 
 ## Architecture decisions (already made)
 - **Level 3 "basic RAG"**, designed so Level 4 (hybrid BM25 + reranker) is an easy upgrade later.
@@ -49,7 +52,7 @@ Users in `data/access.json`: `employee` [all], `hr_user` [all, hr], `exec_user` 
 ## Conventions
 - Code layout: `ingest/` (load, chunk, index), `app/` (retrieve, answer, ui), `evals/`, `infra/` (reporting), `prompts/`, `docs/`, `data/`.
 - Run as modules: `python -m ingest.index`, `python -m evals.run_evals`, `streamlit run app/ui.py`.
-- Log every query (CSV or SQLite in `logs/`): timestamp, user, question, sources used, tokens in/out, latency, cost, outcome, thumbs up/down.
+- Log every query (`logs/query_log.jsonl`): outcome, latency, tokens, cost, error type, post-filter counts; never question text (except thumbs-down feedback), answer text, restricted names, or exception text.
 - Keep functions small and typed; use `pydantic` for the answer schema.
 - **Before every phase commit, run `python scripts/check_env.py --audit`** and show me the output. It must exit 0.
 - pip-audit findings with no fixed version may only be accepted by me. Never add lines to `scripts/audit_exceptions.txt` yourself, and never loosen the check to reach exit 0. The four ChromaDB server advisories are already accepted there (embedded client only).

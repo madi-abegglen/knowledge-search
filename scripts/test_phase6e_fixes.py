@@ -267,8 +267,13 @@ def test_ingest_single_error_and_success_unchanged() -> None:
 def test_ui_shows_error_state_not_refused() -> None:
     from streamlit.testing.v1 import AppTest
 
+    import os
+
     secret = "SECRET-UPSTREAM-DETAIL-9d3f"
     original = A.answer_question
+    saved_log_dir = os.environ.get("LOG_DIR")
+    log_tmp = tempfile.mkdtemp(prefix="ks_test_logs_")   # keep the real logs/ clean
+    os.environ["LOG_DIR"] = log_tmp
     A.answer_question = lambda user, question: {  # type: ignore[assignment]
         "outcome": A.OUTCOME_SERVICE_ERROR, "answer": A.SERVICE_UNAVAILABLE_MESSAGE, "citations": [],
         "conflict_note": None, "clarifying_question": None, "latency_ms": 1.0,
@@ -286,6 +291,10 @@ def test_ui_shows_error_state_not_refused() -> None:
         assert not [b for b in at.button if b.key in ("rate_up", "rate_down")]   # no feedback on errors
     finally:
         A.answer_question = original  # type: ignore[assignment]
+        if saved_log_dir is None:
+            os.environ.pop("LOG_DIR", None)
+        else:
+            os.environ["LOG_DIR"] = saved_log_dir
 
 
 def main() -> int:

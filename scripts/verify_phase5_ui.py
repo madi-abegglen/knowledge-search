@@ -1,17 +1,25 @@
 """Drive app/ui.py headlessly with Streamlit's AppTest and print what each user sees.
 
 Run from the repo root:  .\\.venv\\Scripts\\python.exe scripts\\verify_phase5_ui.py
-Makes real answer_question calls (Anthropic API) and writes one feedback line.
+Makes real answer_question calls (Anthropic API). Logs go to a temporary LOG_DIR so the
+real logs/query_log.jsonl and logs/feedback.jsonl are not polluted by verification runs.
 """
 
+import json
+import os
 from pathlib import Path
 import sys
+import tempfile
 
-from streamlit.testing.v1 import AppTest
+LOG_DIR = Path(tempfile.mkdtemp(prefix="ks_verify_logs_"))
+os.environ["LOG_DIR"] = str(LOG_DIR)
+
+from streamlit.testing.v1 import AppTest  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 UI = str(ROOT / "app" / "ui.py")
-FEEDBACK = ROOT / "logs" / "feedback.jsonl"
+FEEDBACK = LOG_DIR / "feedback.jsonl"
+QUERY_LOG = LOG_DIR / "query_log.jsonl"
 
 
 def visible_text(at: AppTest) -> list[str]:
@@ -69,7 +77,21 @@ def main() -> int:
     print(f"\n(f) feedback lines: {before} -> {after}")
     if after:
         print("last line:", FEEDBACK.read_text(encoding="utf-8").splitlines()[-1])
-    return 0 if after == before + 1 else 1
+
+    # query log: one line per query, rating linked by query_id, no question/answer text
+    log_lines = QUERY_LOG.read_text(encoding="utf-8").splitlines() if QUERY_LOG.exists() else []
+    print(f"\nquery_log lines: {len(log_lines)} (queries asked: 3; the user switch is not a query)")
+    for line in log_lines:
+        print("  ", line)
+    linked = False
+    if after and log_lines:
+        feedback = json.loads(FEEDBACK.read_text(encoding="utf-8").splitlines()[-1])
+        linked = feedback.get("query_id") in {json.loads(l)["id"] for l in log_lines}
+    raw = "\n".join(log_lines)
+    clean = "bonus for executives" not in raw and "PTO days" not in raw and "20 PTO" not in raw
+    print(f"rating linked to a query id: {linked}; log free of question/answer text: {clean}")
+    ok = after == before + 1 and len(log_lines) == 3 and linked and clean
+    return 0 if ok else 1
 
 
 if __name__ == "__main__":

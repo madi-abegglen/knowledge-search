@@ -21,8 +21,9 @@ from app.answer import (  # noqa: E402
     answer_question,
 )
 
+from infra.query_log import FEEDBACK_NAME, log_dir, log_query  # noqa: E402
+
 ACCESS_PATH = ROOT / "data" / "access.json"
-FEEDBACK_PATH = ROOT / "logs" / "feedback.jsonl"
 GENERIC_ERROR = "Something went wrong. Try again."
 BADGES = {"answer": ":green[ANSWER]", "refuse": ":red[REFUSED]", "clarify": ":orange[CLARIFY]"}
 
@@ -33,19 +34,23 @@ def load_users() -> dict[str, str]:
 
 
 def append_feedback(result: dict[str, Any], rating: str) -> None:
-    """Log one rating. Never writes answer text or chunk text."""
-    FEEDBACK_PATH.parent.mkdir(parents=True, exist_ok=True)
-    record = {
+    """Log one rating. Never writes answer text or chunk text. The raw question text is
+    stored ONLY for a thumbs-down (so the failure can be reviewed); thumbs-up stores none."""
+    feedback_path = log_dir() / FEEDBACK_NAME
+    feedback_path.parent.mkdir(parents=True, exist_ok=True)
+    record: dict[str, Any] = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "query_id": result.get("query_id"),
         "user": result["user"],
-        "question": result["question"],
         "outcome": result["outcome"],
         "rating": rating,
         "latency_ms": result["latency_ms"],
         "input_tokens": result["input_tokens"],
         "output_tokens": result["output_tokens"],
     }
-    with FEEDBACK_PATH.open("a", encoding="utf-8") as handle:
+    if rating == "down":
+        record["question"] = result["question"]
+    with feedback_path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
@@ -120,7 +125,10 @@ def main() -> None:
             try:
                 with st.spinner("Searching..."):
                     response = answer_question(user, question)
-                st.session_state["result"] = {**response, "user": user, "question": question}
+                query_id = log_query(user, question, response)
+                st.session_state["result"] = {
+                    **response, "user": user, "question": question, "query_id": query_id,
+                }
             except Exception:
                 st.session_state.pop("result", None)
                 st.error(GENERIC_ERROR)

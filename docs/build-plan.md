@@ -79,13 +79,18 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 **Status: done.** Eval results and the retrieval/prompt changes are in `docs/eval-results.md`; edge cases and their findings are in `docs/edge-cases.md`.
 
 ## Phase 7: Monitoring, runbook, README
-- [ ] Query log fields (see CLAUDE.md); `infra/report.py` prints accuracy sample, refusal rate, avg cost, p95 latency, thumbs-down rate.
-- [ ] Alert thresholds in code: refusal rate > 30%, daily spend > budget, 3+ consecutive failures.
+
+### 7a. Monitoring (done)
+- [x] Query log `logs/query_log.jsonl` (git-ignored): id, timestamp, user, outcome, latency_ms, tokens, cost, error type name, retrieved_count (post-permission-filter), leak_scan_blocked, prompt_version, model, question length + salted sha256 prefix. Ratings in `feedback.jsonl` carry the same `query_id`. Never logs restricted names, pre-filter counts, answer text, exception text or raw question text (`infra/query_log.py`).
+- [x] `infra/report.py` (`python -m infra.report --days N`): outcome mix, refusal/error rate, p50/p95 latency, tokens, cost, thumbs-down rate, leak_scan_blocked. Exit 0 healthy, 1 alert.
+- [x] Alert thresholds in one place (`infra/thresholds.py`): any leak_scan_blocked = CRITICAL; error rate > 5%; 3+ consecutive errors; p95 > 10 s; refusal rate > 40% (eval baseline 24%); daily cost over `DAILY_COST_LIMIT_USD`.
+
+### 7b. Known weaknesses to address (one per cycle; re-run evals after each retrieval/prompt change)
+- [ ] Exact-string guard: verify emails/URLs in an answer appear verbatim in retrieved context (alternative: prompt v2 exact-copy rule).
+
+### 7c. Runbook and README
 - [ ] `docs/runbook.md`: symptom, likely cause, fix. Include: stale answers (re-ingest), wrong docs (tune chunking/top-k), **leak (disable app, audit metadata and filters)**, JSON failures (check prompt version).
 - [ ] `README.md`: architecture diagram, setup steps, results table, known limitations, upgrade path (hybrid retrieval, reranker, live ACL sync, Slack interface).
-
-### Known weaknesses to address in Phase 7
-- Exact-string guard: verify emails/URLs in an answer appear verbatim in retrieved context (alternative: prompt v2 exact-copy rule).
 
 **Done when:** a stranger could run it from the README.
 

@@ -198,10 +198,22 @@ def _runtime_result(
 
 
 def answer_question(user: str, question: str) -> dict[str, Any]:
+    """Answer one question. The result also carries two diagnostic keys used for
+    monitoring (not part of the model schema): `retrieved_count`, the number of chunks
+    that survived the permission filter, and `leak_scan_blocked`, True when the output
+    leak scan replaced a model answer with a refusal."""
+    meta: dict[str, Any] = {"retrieved_count": 0, "leak_scan_blocked": False}
+    result = _answer_question(user, question, meta)
+    result.update(meta)
+    return result
+
+
+def _answer_question(user: str, question: str, meta: dict[str, Any]) -> dict[str, Any]:
     started = time.perf_counter()
     if len(question) > MAX_QUERY_CHARS:
         return _runtime_result(OUTCOME_INVALID_INPUT, QUERY_TOO_LONG_MESSAGE, started)
     chunks = retrieve(user, question)
+    meta["retrieved_count"] = len(chunks)
     if not chunks:
         return _refusal(started)
 
@@ -249,6 +261,7 @@ def answer_question(user: str, question: str) -> dict[str, Any]:
             if any(citation.source not in allowed_sources for citation in payload.citations):
                 raise ValueError("citation source was not retrieved")
             if _mentions_restricted_content(payload, restricted_labels):
+                meta["leak_scan_blocked"] = True
                 return _refusal(started, input_tokens, output_tokens)
             if payload.outcome == "refuse":
                 return _refusal(started, input_tokens, output_tokens)

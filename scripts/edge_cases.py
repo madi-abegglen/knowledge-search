@@ -510,6 +510,8 @@ def main() -> int:
     if ARGS.scratch is None:
         ARGS.scratch = tempfile.mkdtemp(prefix="ks_edge_")
     Path(ARGS.scratch).mkdir(parents=True, exist_ok=True)
+    # the UI case writes to the query log; keep the real logs/ clean
+    os.environ["LOG_DIR"] = str(Path(ARGS.scratch) / "logs")
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
