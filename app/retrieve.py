@@ -2,6 +2,7 @@
 
 import json
 import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,17 @@ def get_user_groups(user: str) -> frozenset[str]:
     return frozenset(groups)
 
 
+@lru_cache(maxsize=1)
+def _get_model(model_name: str) -> SentenceTransformer:
+    return SentenceTransformer(model_name, trust_remote_code=False)
+
+
+@lru_cache(maxsize=1)
+def _get_collection(chroma_path: str) -> Any:
+    client = chromadb.PersistentClient(path=chroma_path)
+    return client.get_collection(COLLECTION_NAME)
+
+
 def retrieve(user: str, question: str) -> list[dict[str, Any]]:
     groups = get_user_groups(user)
     if not groups or not question.strip():
@@ -44,12 +56,11 @@ def retrieve(user: str, question: str) -> list[dict[str, Any]]:
 
     load_dotenv(ROOT / ".env")
     model_name = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
-    model = SentenceTransformer(model_name, trust_remote_code=False)
+    model = _get_model(model_name)
 
     configured_path = Path(os.environ.get("CHROMA_PATH", "./chroma_db"))
     chroma_path = configured_path if configured_path.is_absolute() else ROOT / configured_path
-    client = chromadb.PersistentClient(path=str(chroma_path))
-    collection = client.get_collection(COLLECTION_NAME)
+    collection = _get_collection(str(chroma_path))
     count = collection.count()
     if count == 0:
         return []
