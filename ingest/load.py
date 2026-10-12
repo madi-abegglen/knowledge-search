@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from pypdf import PdfReader
+from pypdf.errors import PyPdfError
 import yaml
 
 
@@ -82,26 +83,39 @@ def load_documents(data_dir: Path) -> list[SourceDocument]:
         raise ValueError(f"{access_path}: missing documents mapping")
 
     documents = []
+    errors: list[str] = []
     for path in sorted(data_dir.iterdir()):
         if not path.is_file() or path.suffix.lower() not in SUPPORTED_SUFFIXES:
             continue
+        try:
+            documents.append(_load_one(path, access_entries))
+        except ValueError as error:
+            errors.append(str(error))
+        except (OSError, PyPdfError) as error:
+            errors.append(f"{path.name}: could not read file ({type(error).__name__})")
 
-        permission = access_entries.get(path.name)
-        if not isinstance(permission, dict):
-            raise ValueError(f"{path.name}: missing access.json document entry")
-        groups = permission.get("allowed_groups")
-        if not isinstance(groups, list) or any(not isinstance(group, str) for group in groups):
-            raise ValueError(f"{path.name}: allowed_groups must be a list of group names in access.json")
-        allowed_groups = frozenset(groups)
-        unknown_groups = allowed_groups.difference(GROUPS)
-        if unknown_groups:
-            raise ValueError(f"{path.name}: unknown access groups: {', '.join(sorted(unknown_groups))}")
-
-        metadata, body = _parse_front_matter(path.name, _read_text(path))
-        modified = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
-        metadata["last_modified"] = modified
-        documents.append(SourceDocument(path.name, body, metadata, allowed_groups))
-
+    # Fail closed: report every bad file at once, index nothing.
+    if errors:
+        listing = "\n".join(f"  - {message}" for message in errors)
+        raise ValueError(f"{len(errors)} document(s) failed validation:\n{listing}")
     if not documents:
         raise ValueError(f"No supported documents found in {data_dir}")
     return documents
+
+
+def _load_one(path: Path, access_entries: dict[str, Any]) -> SourceDocument:
+    permission = access_entries.get(path.name)
+    if not isinstance(permission, dict):
+        raise ValueError(f"{path.name}: missing access.json document entry")
+    groups = permission.get("allowed_groups")
+    if not isinstance(groups, list) or any(not isinstance(group, str) for group in groups):
+        raise ValueError(f"{path.name}: allowed_groups must be a list of group names in access.json")
+    allowed_groups = frozenset(groups)
+    unknown_groups = allowed_groups.difference(GROUPS)
+    if unknown_groups:
+        raise ValueError(f"{path.name}: unknown access groups: {', '.join(sorted(unknown_groups))}")
+
+    metadata, body = _parse_front_matter(path.name, _read_text(path))
+    modified = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
+    metadata["last_modified"] = modified
+    return SourceDocument(path.name, body, metadata, allowed_groups)

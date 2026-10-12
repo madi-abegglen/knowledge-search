@@ -295,3 +295,7 @@ Input tokens on the original 20 questions: 21,119 (gate, v1) vs 21,015 (pairing,
 ### Prompt default
 
 **The default stays prompt v1** (`PROMPT_VERSION` unset means `1`). **v2 remains a candidate, not adopted:** with pairing in place Q2, Q22 and Q24 are flagged 5/5 under v1 as well, and the full 25-question runs have identical outcomes under both versions, so v2 shows no measurable gain on this set while costing about 13% more input tokens. The only v2-specific signal is Q5's exact-address check (9/10 under v1 vs 10/10 under v2 at n=10), which is within noise. Revisit v2 if a case appears where v1 fails to flag or alters an address.
+
+## Phase 6e regression run (after the edge-case fixes)
+
+**Q1-Q25 under prompt v1 = 24/25** (`evals/results/after_6e_v1.json`). **The one miss is Q5**: the model wrote the security address with spaces (`security @ northwind. example`), so the exact-address check failed. This is the known run-to-run variance of about 1 in 10 under v1 and is **unchanged by the 6e fixes**: the retrieved sets are identical to `after_pairing_v1.json`, and a fresh Q5 x10 gave **9/10** (`after_6e_v1_q5_repeats.json`), the same rate as before. Everything else is unchanged: 8/8 conflicts flagged, 0 false conflict notes, citations 18/18, **0 permission leaks**. Nothing was tuned to make Q5 pass.

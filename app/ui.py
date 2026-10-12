@@ -12,7 +12,14 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.answer import REFUSAL_MESSAGE, answer_question  # noqa: E402
+from app.answer import (  # noqa: E402
+    OUTCOME_INVALID_INPUT,
+    OUTCOME_SERVICE_ERROR,
+    QUERY_TOO_LONG_MESSAGE,
+    REFUSAL_MESSAGE,
+    SERVICE_UNAVAILABLE_MESSAGE,
+    answer_question,
+)
 
 ACCESS_PATH = ROOT / "data" / "access.json"
 FEEDBACK_PATH = ROOT / "logs" / "feedback.jsonl"
@@ -55,6 +62,15 @@ def record_rating(rating: str) -> None:
 
 def render_result(result: dict[str, Any]) -> None:
     outcome = result["outcome"]
+    # Runtime states (not model outcomes): fixed constant text, no badge, no feedback buttons,
+    # never exception text.
+    if outcome == OUTCOME_SERVICE_ERROR:
+        st.error(SERVICE_UNAVAILABLE_MESSAGE)
+        return
+    if outcome == OUTCOME_INVALID_INPUT:
+        st.warning(QUERY_TOO_LONG_MESSAGE)
+        return
+
     st.markdown(f"**Outcome:** {BADGES.get(outcome, outcome)}")
 
     if outcome == "refuse":

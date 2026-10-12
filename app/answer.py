@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -17,6 +18,16 @@ from app.retrieve import ROOT, get_user_groups, retrieve
 
 
 REFUSAL_MESSAGE = "I couldn't find that."
+SERVICE_UNAVAILABLE_MESSAGE = "Service unavailable. Please try again."
+MAX_QUERY_CHARS = 2000
+QUERY_TOO_LONG_MESSAGE = "Please shorten your question (2,000 characters max)."
+API_TIMEOUT_SECONDS = 30.0
+API_MAX_RETRIES = 1
+# Runtime states of the result dict. They are NOT model outcomes: AnswerPayload and
+# its three outcomes (answer / refuse / clarify) are unchanged.
+OUTCOME_SERVICE_ERROR = "error"
+OUTCOME_INVALID_INPUT = "invalid_input"
+logger = logging.getLogger("knowledge_search.answer")
 CONTEXT_START = "<<<BEGIN_RETRIEVED_CONTEXT>>>"
 CONTEXT_END = "<<<END_RETRIEVED_CONTEXT>>>"
 CONTEXT_END_ESCAPED = "&lt;&lt;&lt;END_RETRIEVED_CONTEXT&gt;&gt;&gt;"
@@ -149,8 +160,47 @@ def _refusal(started: float, input_tokens: int = 0, output_tokens: int = 0) -> d
     return _result(payload, started, input_tokens, output_tokens)
 
 
+_FENCE_OPEN = re.compile(r"```(?:json)?", re.IGNORECASE)
+
+
+def _strip_code_fence(raw: str) -> str:
+    """Remove ONE leading ```json (or ```) line and ONE trailing ``` line, only when both
+    are present as a pair. Nothing else: no extraction of JSON from surrounding prose;
+    anything that does not match is returned unchanged and validation stays strict."""
+    lines = raw.strip().splitlines()
+    if (len(lines) >= 3 and _FENCE_OPEN.fullmatch(lines[0].strip())
+            and lines[-1].strip() == "```"):
+        return "\n".join(lines[1:-1])
+    return raw
+
+
+def _runtime_result(
+    outcome: str,
+    message: str,
+    started: float,
+    error_type: str | None = None,
+    input_tokens: int = 0,
+    output_tokens: int = 0,
+) -> dict[str, Any]:
+    """Result for states that are not model outcomes. The message is a fixed constant,
+    identical for every user and query; exception text is never included."""
+    return {
+        "outcome": outcome,
+        "answer": message,
+        "citations": [],
+        "conflict_note": None,
+        "clarifying_question": None,
+        "latency_ms": round((time.perf_counter() - started) * 1000, 1),
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "error_type": error_type,
+    }
+
+
 def answer_question(user: str, question: str) -> dict[str, Any]:
     started = time.perf_counter()
+    if len(question) > MAX_QUERY_CHARS:
+        return _runtime_result(OUTCOME_INVALID_INPUT, QUERY_TOO_LONG_MESSAGE, started)
     chunks = retrieve(user, question)
     if not chunks:
         return _refusal(started)
@@ -169,7 +219,7 @@ def answer_question(user: str, question: str) -> dict[str, Any]:
     )
     allowed_sources = {chunk["source"] for chunk in chunks}
     restricted_labels = _restricted_labels(user)
-    client = anthropic.Anthropic()
+    client = anthropic.Anthropic(timeout=API_TIMEOUT_SECONDS, max_retries=API_MAX_RETRIES)
     input_tokens = 0
     output_tokens = 0
 
@@ -181,12 +231,19 @@ def answer_question(user: str, question: str) -> dict[str, Any]:
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_message}],
             )
-        except anthropic.APIError:
-            return _refusal(started, input_tokens, output_tokens)
+        except anthropic.APIError as exc:
+            error_type = type(exc).__name__
+            logger.warning("answer service error: %s", error_type)
+            return _runtime_result(
+                OUTCOME_SERVICE_ERROR, SERVICE_UNAVAILABLE_MESSAGE, started, error_type,
+                input_tokens, output_tokens,
+            )
 
         input_tokens += response.usage.input_tokens
         output_tokens += response.usage.output_tokens
-        raw = "".join(block.text for block in response.content if block.type == "text")
+        raw = _strip_code_fence(
+            "".join(block.text for block in response.content if block.type == "text")
+        )
         try:
             payload = AnswerPayload.model_validate_json(raw)
             if any(citation.source not in allowed_sources for citation in payload.citations):

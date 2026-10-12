@@ -1,6 +1,6 @@
 # Build Plan: Knowledge Search (RAG)
 
-Phases 0-5 are complete. Continue at Phase 6. Each phase ends with a **Done when** check; run it, show the result, stop. Before every phase commit, also run `python scripts/check_env.py --audit` (must exit 0) and show the output.
+Phases 0-6 are complete. Continue at Phase 7. Each phase ends with a **Done when** check; run it, show the result, stop. Before every phase commit, also run `python scripts/check_env.py --audit` (must exit 0) and show the output.
 
 ## Background (how we got here)
 1. The solution was chosen as #2 of the top-5 AI automation ideas by return on value (meeting intelligence, **knowledge search**, AP processing, contract review, recurring reporting).
@@ -76,11 +76,16 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 
 **Done when:** baseline and after-tweak scores are recorded, with **0 leaks**.
 
+**Status: done.** Eval results and the retrieval/prompt changes are in `docs/eval-results.md`; edge cases and their findings are in `docs/edge-cases.md`.
+
 ## Phase 7: Monitoring, runbook, README
 - [ ] Query log fields (see CLAUDE.md); `infra/report.py` prints accuracy sample, refusal rate, avg cost, p95 latency, thumbs-down rate.
 - [ ] Alert thresholds in code: refusal rate > 30%, daily spend > budget, 3+ consecutive failures.
 - [ ] `docs/runbook.md`: symptom, likely cause, fix. Include: stale answers (re-ingest), wrong docs (tune chunking/top-k), **leak (disable app, audit metadata and filters)**, JSON failures (check prompt version).
 - [ ] `README.md`: architecture diagram, setup steps, results table, known limitations, upgrade path (hybrid retrieval, reranker, live ACL sync, Slack interface).
+
+### Known weaknesses to address in Phase 7
+- Exact-string guard: verify emails/URLs in an answer appear verbatim in retrieved context (alternative: prompt v2 exact-copy rule).
 
 **Done when:** a stranger could run it from the README.
 

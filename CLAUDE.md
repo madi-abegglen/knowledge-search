@@ -12,8 +12,8 @@ Full build plan: `docs/build-plan.md`. Problem statement and success metrics: `d
 - [x] Phase 3: ingestion pipeline  
 - [x] Phase 4: permission-aware retrieval + 3-outcome answers 
 - [x] Phase 5: Streamlit UI
-- [ ] Phase 6: evals and edge-case testing **<- start here**
-- [ ] Phase 7: monitoring, runbook, README
+- [x] Phase 6: evals and edge-case testing
+- [ ] Phase 7: monitoring, runbook, README **<- start here**
 
 ## Architecture decisions (already made)
 - **Level 3 "basic RAG"**, designed so Level 4 (hybrid BM25 + reranker) is an easy upgrade later.
