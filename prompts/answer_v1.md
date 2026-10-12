@@ -1,7 +1,7 @@
 ---
 version: "1"
 owner: knowledge-search
-model: "${MODEL_NAME}"
+model: "selected at runtime by MODEL_NAME in .env; not read from this file"
 purpose: Answer employee questions only from permission-filtered retrieved context.
 changelog: Initial three-outcome answer contract.
 ---

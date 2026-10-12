@@ -90,7 +90,12 @@ Columns: `id, user, question, expected_outcome, expected_source, must_contain, n
 - [x] Indexed chunk text was the tokenizer's decoded form (lowercased, spaced punctuation) and is what the model saw. Fixed in 7b2: the original text span per chunk is stored, embeddings and retrieval unchanged (65 chunks, top-8 identical for Q1-Q25); real index swapped; Q5 raw-model 20/20 (was 18/20).
 - [ ] Non-English questions are refused (English-only embedding model; Spanish/Japanese distances 0.74-0.85 vs 0.195). Needs a multilingual model and a re-baseline.
 - [ ] Guard gaps: `clarifying_question` is not scanned; capitalized label after a stray ". " fails closed.
-- [ ] Missing `MODEL_NAME` returns the standard refusal (a configuration error looks like "not found").
+- [x] Missing `MODEL_NAME` / `ANTHROPIC_API_KEY` looked like "not found". Fixed in 7b3-A: distinct `ConfigError` runtime error state.
+
+### 7b3. Small cleanups
+- [x] A. Missing/blank `MODEL_NAME` or `ANTHROPIC_API_KEY`: distinct config error state (startup and query time), no model call, nothing sensitive shown or logged.
+- [x] B. Prompt front matter `model` placeholder replaced; rendered system prompt byte-identical (v1 and v2).
+- [ ] C. Lockfile rebuild from a clean venv with a runtime / dev split: **pending approval** (`docs/lockfile-proposal.md`; the working venv and committed `requirements.txt` are unchanged).
 
 ### 7c. Runbook and README
 - [ ] `docs/runbook.md`: symptom, likely cause, fix. Include: stale answers (re-ingest), wrong docs (tune chunking/top-k), **leak (disable app, audit metadata and filters)**, JSON failures (check prompt version).

@@ -28,6 +28,12 @@ API_MAX_RETRIES = 1
 # its three outcomes (answer / refuse / clarify) are unchanged.
 OUTCOME_SERVICE_ERROR = "error"
 OUTCOME_INVALID_INPUT = "invalid_input"
+# Misconfiguration (missing/blank MODEL_NAME or ANTHROPIC_API_KEY) uses the same runtime error
+# state as an API failure, with its own fixed message. Only CONFIG_ERROR_TYPE is ever logged;
+# setting names and values are never shown or logged.
+CONFIG_ERROR_MESSAGE = "Service is not configured. Contact the administrator."
+CONFIG_ERROR_TYPE = "ConfigError"
+REQUIRED_SETTINGS = ("MODEL_NAME", "ANTHROPIC_API_KEY")
 logger = logging.getLogger("knowledge_search.answer")
 CONTEXT_START = "<<<BEGIN_RETRIEVED_CONTEXT>>>"
 CONTEXT_END = "<<<END_RETRIEVED_CONTEXT>>>"
@@ -220,8 +226,27 @@ def answer_question(user: str, question: str) -> dict[str, Any]:
     return result
 
 
+def check_config() -> str | None:
+    """CONFIG_ERROR_TYPE if a required setting is missing, empty or whitespace-only; else None.
+
+    Never returns (or logs) setting names or values. An empty value that is explicitly set in the
+    process environment counts as missing: load_dotenv does not override variables that are set.
+    """
+    load_dotenv(ROOT / ".env")
+    for name in REQUIRED_SETTINGS:
+        if not os.environ.get(name, "").strip():
+            return CONFIG_ERROR_TYPE
+    return None
+
+
 def _answer_question(user: str, question: str, meta: dict[str, Any]) -> dict[str, Any]:
     started = time.perf_counter()
+    # First check, before anything else, so the state is identical for every user and query and
+    # no retrieval or model call happens on a misconfigured service.
+    config_problem = check_config()
+    if config_problem:
+        logger.warning("answer service error: %s", config_problem)
+        return _runtime_result(OUTCOME_SERVICE_ERROR, CONFIG_ERROR_MESSAGE, started, config_problem)
     if len(question) > MAX_QUERY_CHARS:
         return _runtime_result(OUTCOME_INVALID_INPUT, QUERY_TOO_LONG_MESSAGE, started)
     chunks = retrieve(user, question)
@@ -229,11 +254,7 @@ def _answer_question(user: str, question: str, meta: dict[str, Any]) -> dict[str
     if not chunks:
         return _refusal(started)
 
-    load_dotenv(ROOT / ".env")
-    model_name = os.environ.get("MODEL_NAME")
-    if not model_name:
-        return _refusal(started)
-
+    model_name = os.environ["MODEL_NAME"].strip()
     system_prompt = _load_prompt()
     user_message = (
         f"Question:\n{question}\n\n"

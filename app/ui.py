@@ -13,12 +13,15 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.answer import (  # noqa: E402
+    CONFIG_ERROR_MESSAGE,
+    CONFIG_ERROR_TYPE,
     OUTCOME_INVALID_INPUT,
     OUTCOME_SERVICE_ERROR,
     QUERY_TOO_LONG_MESSAGE,
     REFUSAL_MESSAGE,
     SERVICE_UNAVAILABLE_MESSAGE,
     answer_question,
+    check_config,
 )
 
 from infra.query_log import FEEDBACK_NAME, log_dir, log_query  # noqa: E402
@@ -70,7 +73,10 @@ def render_result(result: dict[str, Any]) -> None:
     # Runtime states (not model outcomes): fixed constant text, no badge, no feedback buttons,
     # never exception text.
     if outcome == OUTCOME_SERVICE_ERROR:
-        st.error(SERVICE_UNAVAILABLE_MESSAGE)
+        if result.get("error_type") == CONFIG_ERROR_TYPE:
+            st.error(CONFIG_ERROR_MESSAGE)
+        else:
+            st.error(SERVICE_UNAVAILABLE_MESSAGE)
         return
     if outcome == OUTCOME_INVALID_INPUT:
         st.warning(QUERY_TOO_LONG_MESSAGE)
@@ -103,6 +109,11 @@ def render_result(result: dict[str, Any]) -> None:
 def main() -> None:
     st.set_page_config(page_title="Knowledge Search", page_icon="🔎")
     st.title("Knowledge Search")
+
+    # Startup check: a misconfigured service shows one fixed message (no setting names or values).
+    if check_config():
+        st.error(CONFIG_ERROR_MESSAGE)
+        st.stop()
 
     users = load_users()
     with st.sidebar:

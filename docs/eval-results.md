@@ -423,3 +423,15 @@ On the swapped real index (temporary `LOG_DIR`, so the real `logs/` were not tou
 | Audit | exit 0 |
 
 Rollback if ever needed: stop the app, replace `chroma_db/` with `chroma_db_backup_pre7b2/`. The backup is local and git-ignored; delete it once you are satisfied.
+
+## Small cleanups (7b3)
+
+No retrieval, chunking, schema or prompt-text change. A and B are done; C is a proposal pending approval.
+
+| Item | Result |
+|---|---|
+| A. Missing/blank `MODEL_NAME` or `ANTHROPIC_API_KEY` | Returns the runtime error state (outcome `error`, fixed message "Service is not configured. Contact the administrator.", error type `ConfigError`), no retrieval and no model call; identical for every user and query; names and values never shown or logged. UI startup check shows the same message and stops. Previously a missing `MODEL_NAME` returned the standard refusal. Tests: 9 (`scripts/test_config_error.py`). |
+| B. Prompt front matter `model: "${MODEL_NAME}"` | The value was never read (the loader only requires the key; the model comes from `MODEL_NAME` in `.env`). Value replaced with a truthful description in v1 and v2. **Rendered system prompt byte-identical before and after**: v1 `de4dac5c...e4c66`, v2 `416e0080...eaebb` (sha256, `fc /b`: no differences; `scripts/render_prompts.py`). |
+| C. Lockfile | Proposal only: see `docs/lockfile-proposal.md`. Runtime lock 118 packages, dev lock 16; 15 runtime packages differ by resolution drift; both audit clean; all suites and Q1-Q25 pass under the new set. Not adopted. |
+
+Regression on the working venv and real index (temporary `LOG_DIR`): suites 8 + 13 + 26 + 27 + 7 + 9 passed; Q1-Q25 v1 **25/25**, 0 leaks, 8/8 conflicts, 0 false notes, guard repaired=0 blocked=0 (`after_7b3_v1.json`); `verify_phase5_ui` exit 0; edge cases 30 PASS + 2 documented findings; real index 65 chunks; `data/` fingerprint `82be1429dbfe5dd4`; audit exit 0.
