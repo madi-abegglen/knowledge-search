@@ -189,10 +189,16 @@ def run_one(row: dict[str, str], documents: dict[str, dict[str, Any]]) -> dict[s
     if retrieval_error:
         checks["reasons"].append(f"retrieve raised {retrieval_error}")
         checks["passed"] = False
+    return build_record(row, result, retrieved, checks)
+
+
+def build_record(
+    row: dict[str, str], result: dict[str, Any], retrieved: list[str], checks: dict[str, Any]
+) -> dict[str, Any]:
     return {
         "id": int(row["id"]),
-        "user": user,
-        "question": question,
+        "user": row["user"],
+        "question": row["question"],
         "expected_outcome": row["expected_outcome"],
         "expected_source": split_items(row["expected_source"]),
         "actual_outcome": result["outcome"],
@@ -206,6 +212,26 @@ def run_one(row: dict[str, str], documents: dict[str, dict[str, Any]]) -> dict[s
         "retrieved_sources": retrieved,
         **checks,
     }
+
+
+def rescore_one(
+    row: dict[str, str], stored: dict[str, Any], documents: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    """Re-apply the current CSV checks to a stored result. No API or retrieval calls."""
+    allowed = allowed_sources(row["user"], documents)
+    labels = restricted_labels(allowed, documents)
+    result = {
+        "outcome": stored["actual_outcome"],
+        "answer": stored["answer"],
+        "citations": stored["citations"],
+        "conflict_note": stored["conflict_note"],
+        "clarifying_question": stored["clarifying_question"],
+        "latency_ms": stored["latency_ms"],
+        "input_tokens": stored["input_tokens"],
+        "output_tokens": stored["output_tokens"],
+    }
+    checks = check_question(row, result, stored["retrieved_sources"], allowed, labels)
+    return build_record(row, result, stored["retrieved_sources"], checks)
 
 
 def rate(num: int, den: int) -> str:
@@ -260,13 +286,23 @@ def print_report(results: list[dict[str, Any]], summary: dict[str, Any], cost: f
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", default="baseline", help="results file name (evals/results/<name>.json)")
+    parser.add_argument("--rescore", metavar="NAME",
+                        help="re-score evals/results/NAME.json with the current CSV, offline (no API calls)")
     args = parser.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     load_dotenv(ROOT / ".env")
     documents = load_documents()
-    results = [run_one(row, documents) for row in load_questions()]
+    stored_meta: dict[str, Any] = {}
+    if args.rescore:
+        if args.name == args.rescore:
+            parser.error("--name must differ from --rescore so the original results are kept")
+        stored_meta = json.loads((RESULTS_DIR / f"{args.rescore}.json").read_text(encoding="utf-8"))
+        stored = {r["id"]: r for r in stored_meta["results"]}
+        results = [rescore_one(row, stored[int(row["id"])], documents) for row in load_questions()]
+    else:
+        results = [run_one(row, documents) for row in load_questions()]
     summary = summarize(results)
 
     price_in, price_out = price("PRICE_INPUT_PER_MTOK"), price("PRICE_OUTPUT_PER_MTOK")
@@ -282,9 +318,10 @@ def main() -> int:
     payload = {
         "run_name": args.name,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "model": os.environ.get("MODEL_NAME", "unset"),
-        "prompt": prompt_meta(),
-        "embed_model": os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2"),
+        "rescored_from": args.rescore,
+        "model": stored_meta.get("model") or os.environ.get("MODEL_NAME", "unset"),
+        "prompt": stored_meta.get("prompt") or prompt_meta(),
+        "embed_model": stored_meta.get("embed_model") or os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2"),
         "price_per_mtok": {"input": price_in, "output": price_out},
         "summary": summary,
         "results": results,

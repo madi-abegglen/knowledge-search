@@ -42,6 +42,27 @@ def _get_collection(chroma_path: str) -> Any:
     return client.get_collection(COLLECTION_NAME)
 
 
+def _select_final(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Best current chunks first; reserve ONE slot for a superseded chunk of a
+    same-titled document so conflicts can surface. Superseded chunks go last."""
+    by_distance = lambda chunk: chunk["distance"]  # noqa: E731
+    current = sorted(
+        (c for c in chunks if c["metadata"].get("doc_status") == "current"), key=by_distance
+    )
+    superseded = sorted(
+        (c for c in chunks if c["metadata"].get("doc_status") != "current"), key=by_distance
+    )
+
+    head = current[: KEEP_BEST - 1]
+    titles = {chunk["metadata"].get("title") for chunk in head}
+    reserved = next((c for c in superseded if c["metadata"].get("title") in titles), None)
+    if reserved is None:
+        return (current + superseded)[:KEEP_BEST]
+
+    rest = [c for c in superseded if c is not reserved]
+    return (head + [reserved] + rest)[:KEEP_BEST]
+
+
 def retrieve(user: str, question: str) -> list[dict[str, Any]]:
     groups = get_user_groups(user)
     if not groups or not question.strip():
@@ -89,8 +110,4 @@ def retrieve(user: str, question: str) -> list[dict[str, Any]]:
             "distance": float(distance),
         })
 
-    chunks.sort(key=lambda chunk: (
-        chunk["metadata"].get("doc_status") != "current",
-        chunk["distance"],
-    ))
-    return chunks[:KEEP_BEST]
+    return _select_final(chunks)

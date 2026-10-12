@@ -3,7 +3,7 @@ id,user,question,expected_outcome,expected_source,must_contain,must_not_contain,
 2,employee,How many unused PTO days carry over?,answer,hr_pto_policy_2025.md,5 days|5 unused|five,,"2025 doc: 5 days (2023 doc says 3)."
 3,employee,What are the company holidays in 2026?,answer,hr_holiday_calendar_2026.md,Thanksgiving|Christmas|Memorial Day,,"Holiday calendar lists 11 paid holidays."
 4,employee,How do I reset my password?,answer,it_faq.md,self-service portal|Forgot password,,
-5,employee,How do I report a phishing email?,answer,it_security_incident_reporting.md,Report Phish|security@northwind.example,,
+5,employee,How do I report a phishing email?,answer,it_security_incident_reporting.md,Report Phish;security@northwind.example,,
 6,employee,What's the daily meal limit when traveling?,answer,finance_expense_policy.md,$75|75 per day,,
 7,employee,What's the process to onboard a new vendor and who approves over $10k?,answer,finance_vendor_onboarding.md;procurement_approval_matrix.md,department head;Finance Director,,"Example B. Matrix: $10,001-$50,000 = Department head + Finance Director; over $50,000 needs VP of Finance + COO."
 8,employee,"Do I need a PO for a $3,000 purchase?",answer,finance_vendor_onboarding.md,"yes|2,500",,"PO required for spend over $2,500 (vendor onboarding step 6)."
