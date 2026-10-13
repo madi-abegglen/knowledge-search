@@ -10,6 +10,8 @@ clarifying question when the question is vague, and never shows content the aske
 The question it explores: *can a retrieval system enforce document permissions before the model sees anything, and can
 you show, with tests and an eval set, that restricted content never leaks?*
 
+**Case study:** [How this was built and what it found](https://claude.ai/artifact/MQkkKVWW9tNfRfbShCqyNX)
+
 ## How it works
 
 ```mermaid
@@ -228,4 +230,4 @@ permission leaks" before review. The build plan is [docs/build-plan.md](docs/bui
 
 ## License
 
-No license has been chosen yet.
+MIT License, see LICENSE.

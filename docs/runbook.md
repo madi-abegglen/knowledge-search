@@ -20,7 +20,8 @@ real output unless marked synthetic.
 - Always bind to localhost (`--server.address localhost`); see `docs/security.md`.
 - To run without opening a browser or asking questions, add `--server.headless true` (verified: starts and answers
   the health check). On a machine that has never run Streamlit it may ask for an optional email on first start;
-  press Enter to skip. Not observed here (a Streamlit credentials file already exists on this machine).
+  press Enter to skip. That first-run prompt is Streamlit's default behavior and was not exercised during
+  verification.
 - First query after a start is slower: the embedding model loads on first use (`all-MiniLM-L6-v2`; downloaded from
   Hugging Face if not cached). A harmless "unauthenticated requests to the HF Hub" warning may print.
 - If the page shows a red "Service is not configured" message, see section 4.

@@ -6,3 +6,9 @@ __pycache__/
 *.pyc
 .DS_Store
 chroma_db_backup*/
+# local config variants and editor/secret files (added before making the repo public)
+.env.*
+!.env.example
+.streamlit/secrets.toml
+*.pem
+.vscode/
