@@ -14,26 +14,79 @@ you show, with tests and an eval set, that restricted content never leaks?*
 
 ## How it works
 
+Two flows: **ingest** builds the index once, **query** answers one question. Solid arrows are the normal path;
+dashed arrows are the routes that end in a fixed message.
+
+### Ingest (`python -m ingest.index`)
+
 ```mermaid
 flowchart TD
-    Q[Question and selected user] --> C[Config check and 2000 character cap]
-    C --> R[Embed the question with all-MiniLM-L6-v2]
-    R --> F["Chroma vector query WITH permission filter: only chunks whose group flags match the user's groups"]
-    F --> S["Top 8 chunks, keep 5: current versions first, older versions of the same section paired"]
-    S --> P["Versioned prompt + retrieved text as delimited, untrusted data"]
-    P --> M[Claude returns strict JSON]
-    M --> V["Schema validation, retry once"]
-    V --> G["Exact-string guard: emails and URLs must be in the permitted chunks"]
-    G --> CC["Citation check: cited sources must be among the retrieved ones"]
-    CC --> L["Leak scan: model output must not name restricted documents"]
-    L --> O{Outcome}
-    O --> A[Answer with citations, plus a conflict note if an older version differs]
-    O --> N["Refuse: fixed text I couldn't find that"]
-    O --> K[Clarifying question]
-    A --> U[UI]
-    N --> U
+    A["data/*.md, *.txt, *.pdf<br/>+ data/access.json"]
+    B["ingest/load.py: validate<br/>front matter, access entry<br/>and group names"]
+    X["Abort: all errors listed,<br/>nothing is indexed"]
+    C["ingest/chunk.py: split on<br/>headings, about 200 tokens,<br/>30 overlap, hard cap 256"]
+    D["Stored text: the original<br/>source span of each chunk"]
+    E["Embed with all-MiniLM-L6-v2<br/>(token-decoded chunk text)"]
+    F["ingest/index.py: upsert into<br/>Chroma collection<br/>knowledge_chunks (cosine)"]
+    G["Per chunk: source, title, section,<br/>version, doc_status and one<br/>grp_* flag per group"]
+    H["Delete chunk ids that are no<br/>longer in the source files"]
+
+    A --> B
+    B -.->|"any bad file"| X
+    B --> C
+    C --> D
+    C --> E
+    D --> F
+    E --> F
+    F --> G
+    F --> H
+```
+
+### Query (one question)
+
+```mermaid
+flowchart TD
+    Q["Question + selected demo user<br/>(app/ui.py)"]
+    C["app/answer.py: config check<br/>+ 2000 character cap"]
+    E["Fixed error or input message<br/>no retrieval, no model call"]
+    R["app/retrieve.py: embed<br/>the question"]
+    F["Chroma vector query with the<br/>permission filter: only chunks<br/>flagged for the user's groups,<br/>top 8"]
+    S["Keep best 5: current versions<br/>first, older version of the<br/>same section paired (max 2)"]
+    P["Prompt: versioned file +<br/>retrieved text as delimited,<br/>untrusted data"]
+    M["Claude returns strict JSON<br/>(30 s timeout, 1 retry)"]
+    V["Strip code fence, validate<br/>schema (retry once if invalid)"]
+    G["app/guard.py: emails and URLs<br/>must be in the permitted chunks"]
+    CC["Citation check: cited sources<br/>must be among the retrieved ones"]
+    L["Leak scan of visible text:<br/>no restricted file names or<br/>titles (refusals not scanned)"]
+    A["Answer with citations<br/>(+ conflict note if any)"]
+    K["Clarifying question"]
+    N["Fixed refusal:<br/>I couldn't find that."]
+    U["UI shows the result<br/>Query log: outcome, latency,<br/>tokens, cost, counts<br/>(no question or answer text)"]
+
+    Q --> C
+    C -.->|"not configured / too long"| E
+    C --> R
+    R --> F
+    F -.->|"no chunks / unknown user"| N
+    F --> S
+    S --> P
+    P --> M
+    M -.->|"API failure"| E
+    M --> V
+    V -.->|"invalid twice"| N
+    V --> G
+    G -.->|"unknown address"| N
+    G --> CC
+    CC -.->|"source not retrieved"| N
+    CC -->|"model said refuse"| N
+    CC --> L
+    L -.->|"restricted name found"| N
+    L -->|"answer"| A
+    L -->|"clarify"| K
+    A --> U
     K --> U
-    U --> LOG["Query log: outcome, latency, tokens, cost, counts. No question or answer text"]
+    N --> U
+    E --> U
 ```
 
 Key properties:
